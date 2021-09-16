@@ -58,15 +58,15 @@ def compute_fitness(environment, individual):
 
 def survival_selection(population, population_fitness, offspring, offspring_fitness):
 	"""
-	Choose which individuals from the parent population and from the offspring 
+	Choose which individuals from the (parent) population and from the offspring 
 	survive to the next generation.
 
-	Currently, all the offspring are selected, and the remaining spots are filled based
+	Currently, all the offspring are selected, and the remaining spots are filled from the population based
 	on fitness from highest to lowest. It is assumed that the number of offspring is no more
-	than the size of the population!
+	than the size of the population.
 
 	:param population_array: The (parent) population. An array of shape (population_size, num_genes)
-	:param fitness_array: Fitness of the (parent) population. A 1-d array of length population_size
+	:param fitness_array: Fitness of the population. A 1-d array of length population_size
 	:param offspring_array: The offspring generated from the parent population. An array of shape 
 	(num_offspring, num_genes)
 	:param offspring_fitness_array: The fitness of the offspring. A 1-d array of length num_offspring
