@@ -19,7 +19,7 @@ def initialize_generation(population_size, num_genes):
 	return np.random.uniform(-1, 1, (population_size, num_genes))
 
 
-def generate_next_generation(population, population_fitness):
+def generate_next_generation(environment, population, population_fitness):
 	"""
 	Nils
 	Generates next generation from current population.
@@ -29,13 +29,19 @@ def generate_next_generation(population, population_fitness):
 	# generate pairs of parents that can be used for recombination
 	parent_pairs = parent_selection(population, population_fitness)
 
+	all_children = []
+	all_children_fitness = []
 	# generate offspring
 	for i in len(parent_pairs):
-		children, children_fitness = recombine(parent_pairs[i][0], parent_pairs[i][1])
-	
+		children, children_fitness = recombine(environment, parent_pairs[i][0], parent_pairs[i][1], num_offspring=1)
+		all_children.append(children)
+		all_children_fitness.append(children_fitness)
+
+	all_children = np.concatenate(all_children)
+	all_children_fitness = np.concatenate(all_children_fitness)
 
 	# population and population fitness arrays for next generation
-	new_population, new_population_fitness = survivor_selection(population, population_fitness, children, children_fitness)
+	new_population, new_population_fitness = survival_selection(population, population_fitness, all_children, all_children_fitness)
 
 	return new_population, new_population_fitness
 
@@ -47,7 +53,7 @@ def parent_selection(population_array, fitness_array):
 	"""
 	return
 
-def recombine(parent_1, parent_2, num_genes, num_offspring, environment):
+def recombine(environment, parent_1, parent_2, num_genes, num_offspring):
 	"""
 	Nils
 	Generate one offspring from individuals x and y using crossover
@@ -65,13 +71,14 @@ def recombine(parent_1, parent_2, num_genes, num_offspring, environment):
 
 	# Apply whole arithmetic recombination to create children
 	for i in len(children):
+		alpha = np.random.uniform(0,1)
 		child = alpha * parent_1 + (1 - alpha) * parent_2
 
 		# normalize each new vector between [-1, 1]
 		# put this in separate function, and choose a more appropriate scaling mechanism
 
 		# apply mutation on each child
-		mutate(child)
+		child = mutate(child)
 
 		# normalize each new vector between [-1, 1]
 		# put this in separate function, and choose a more appropriate scaling mechanism
