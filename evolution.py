@@ -23,13 +23,22 @@ def generate_next_generation(population_array, fitness_array):
 	# should normalize each new vector between [-1, 1]
 	return
 
-def parent_selection(population_array, fitness_array):
+def parent_selection(population, population_fitness):
 	"""
-	Charles
-	Returns a list of pairs with size |population| containing the selected parents that will reproduce.
-	:param populaton_fitness: array containing each individual in population and their fitness score
+	Returns a list of 2-tuples with size |population| containing selected parent genotype vectors.
+	:param population: numpy array containing each individual in population
+	:param population_fitness: numpy array containing each individual's fitness score
 	"""
-	return
+	parent_list = []
+	population_size = population.shape[0]
+	# iterate until we have as many parent pairs as the size of our population
+	while len(parent_list) != population_size:
+		# draw random sample of 5 individuals
+		sample = np.random.choice(population_size, 5, replace=False)
+		# select 2 parents with highest fitness scores
+		top_2 = sorted(sample, key=lambda index : population_fitness[index])[-2:]
+		parent_list.append((population[top_2[0]], population[top_2[1]]))
+	return parent_list
 
 def recombine(parent_1, parent_2):
 	"""
