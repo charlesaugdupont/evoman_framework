@@ -56,7 +56,49 @@ def compute_fitness(environment, individual):
 	fitness, player_life, enemy_life, time = environment.play(pcont=individual)
 	return fitness
 
-def surivival_selection():
+def survival_selection(population, population_fitness, offspring, offspring_fitness):
 	"""
-	Otto
+	Choose which individuals from the parent population and from the offspring 
+	survive to the next generation.
+
+	Currently, all the offspring are selected, and the remaining spots are filled based
+	on fitness from highest to lowest. It is assumed that the number of offspring is no more
+	than the size of the population!
+
+	:param population_array: The (parent) population. An array of shape (population_size, num_genes)
+	:param fitness_array: Fitness of the (parent) population. A 1-d array of length population_size
+	:param offspring_array: The offspring generated from the parent population. An array of shape 
+	(num_offspring, num_genes)
+	:param offspring_fitness_array: The fitness of the offspring. A 1-d array of length num_offspring
+	:return value: A tuple (population, fitness) where the population is an array of shape 
+	(population_size, num_genes) and fitness is a 1-d array of length population_size
 	"""
+	# we choose all the offspring
+	new_population = offspring
+	new_fitness = offspring_fitness
+
+	# how many parents we will select to survive
+	num_parents = population.shape[0] - offspring.shape[0]
+
+	# rankings of the parent population from lowest to highest fitness
+	parent_ranking = np.argsort(population_fitness)
+	# choose num_parents best from the parents
+	parent_ranking = parent_ranking[-num_parents:]
+	new_population = np.vstack((new_population, population[parent_ranking,:]))
+	new_fitness = np.append(new_fitness, population_fitness[parent_ranking])
+	
+	return new_population, new_fitness
+
+# testing the function
+# parents = np.random.uniform(-1, 1, size = (10, 3))
+# print(parents)
+# fitness = np.random.normal(0, 100, size = (10,))
+# print(fitness)
+# offspring = np.random.uniform(-1, 1, size = (5, 3))
+# print(offspring)
+# offspring_fitness = np.random.normal(0, 100, size = (5,))
+# print(offspring_fitness)
+# new_population, new_fitness = survival_selection(parents, fitness, offspring, offspring_fitness)
+# print(new_population)
+# print(new_fitness)
+
