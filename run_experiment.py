@@ -1,9 +1,9 @@
 ##################################################################################
-# This file could be the main experiment script that we call from the command line
+# This file is the main experiment script that we call from the command line
 # e.g. "python run_experiment.py [arguments]"
 #
 # We can pass arguments such as population size, number of generations,
-# enemy number, even something like which EA to use etc...
+# enemy number, even perhaps which EA to use etc...
 ##################################################################################
 
 # imports framework
@@ -13,9 +13,15 @@ from environment import Environment
 from nn_controller import player_controller
 
 # other imports
-from evolution import initialize_generation, generate_next_generation, compute_fitness
+import csv
 import argparse
-import IPython # nice for debugging : type 'IPython.embed()' on a line where you want to debug
+import numpy as np
+from evolution import initialize_generation, generate_next_generation, compute_fitness
+
+# choose this for not using visuals and thus making experiments faster
+headless = True
+if headless:
+    os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 # parses the arguments from command line
 parser = argparse.ArgumentParser()
@@ -31,42 +37,52 @@ num_hidden_neurons = args.num_neurons
 enemy = args.enemy
 
 # sets up experiment results folder for logs
-experiment_name = "experiment_results/"+str(num_generations)+"x"+str(population_size)+"_enemy"+str(enemy)
+experiment_name = "experiment_results/"+"enemy"+str(enemy)
 if not os.path.exists(experiment_name):
     os.makedirs(experiment_name)
 
 # initialize environment
-env = Environment(experiment_name=experiment_name,
+environment = Environment(experiment_name=experiment_name,
                   enemies=[enemy],
                   playermode="ai",
                   player_controller=player_controller(num_hidden_neurons),
                   enemymode="static",
                   level=2,
-                  speed="fastest")
+                  speed="fastest", 
+                  logs="off") # avoid logging to stdout
 
 # total number of "genes" or weights in the neural network controller
-num_genes = (env.get_num_sensors()+1)*num_hidden_neurons + (num_hidden_neurons+1)*5
+num_genes = (environment.get_num_sensors()+1)*num_hidden_neurons + (num_hidden_neurons+1)*5
 
-# initialize first generation
-current_generation = initialize_generation(population_size, num_genes)
+# repeat experiment for a total of 10 runs
+for run in range(10):
 
-# repeat for num_generations
-for iteration in range(num_generations):
+    # initialize first generation : numpy array with dimension (100, 265)
+    population_array = initialize_generation(population_size, num_genes)
+    # compute fitness scores
+    fitness_array = np.zeros((population_size,))
+    for index, individual in enumerate(population_array):
+        fitness_array[index] = compute_fitness(environment, individual)
 
-	# 1) run simulation on each individual in current_generation by calling compute_fitness(env, individual)
+    # store generation 0 metrics
+    with open(os.path.join(experiment_name, "run"+str(run)+"_results.csv"), 'w', encoding="UTF-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["Generation", "Max", "Mean", "SD"]) # header
+        writer.writerow([0, np.max(fitness_array), np.mean(fitness_array), np.std(fitness_array)])
+    
+    # store best individual
+    max_fitness_index = np.argmax(fitness_array)
+    best_individual, best_fitness = population_array[max_fitness_index], fitness_array[max_fitness_index]
+    np.savetxt(os.path.join(experiment_name, "run"+str(run)+"_best.txt"), best_individual)
 
-	# 2) call generate_next_generation using these results - this is where our genetic algorithm will come in
-
-	# 3) keep track of important metrics such as fitness of every individual in every generation
-	#    so that we can compute means, maximums etc. and make our plots
-
-	# 4) also keep track of the best individual out of all generations
-
-	pass
-
-
-# high-level TODO tasks:
-#		- add mechanism for saving progress, similar to what is inside of optimization_specialist_demo
-#		- implement functions inside evolution.py
-#		- maybe adding an additional outer loop that does the 10 runs>
-#		- ...
+    # repeat num_generations times
+    for iteration in range(1, num_generations):
+        # evolve generation
+        population_array, fitness_array = generate_next_generation(environment, population_array, fitness_array)
+        max_fitness_index = np.argmax(fitness_array)
+        with open(os.path.join(experiment_name, "run"+str(run)+"_results.csv"), 'a', encoding="UTF-8") as f:
+            writer = csv.writer(f)
+            writer.writerow([iteration, fitness_array[max_fitness_index], np.mean(fitness_array), np.std(fitness_array)])
+        if fitness_array[max_fitness_index] > best_fitness:
+            best_individual, best_fitness = population_array[max_fitness_index], fitness_array[max_fitness_index]
+            np.savetxt(os.path.join(experiment_name, "run"+str(run)+"_best.txt"), best_individual)
