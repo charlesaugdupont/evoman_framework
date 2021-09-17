@@ -49,13 +49,37 @@ def recombine(parent_1, parent_2):
 	"""
 	return
 
+
+def weightlimit(w):
+	"""
+	Johanna 
+	defining upper and lower limits for the weights in the individual's array.  
+	"""
+	upper_weightlimit= 1
+	lower_weightlimit = -1
+
+	if w > upper_weightlimit:
+		return upper_weightlimit 
+	elif w < lower_weightlimit:
+		return lower_weightlimit 
+	else:
+		return w 
+
 def mutate(individual):
 	"""
 	Johanna
-	Applies random mutation to individual.
-	:param x: numpy vector with 265 weights
+	:param individual: numpy vector with 265 weights
+	:param mutation_probability: for each weight within an individual's vector, there is a 20% chance that a random mutation is applied.
+	- the mutation size is drawn from a normal distribution (with mean = 0 and std = 1)
+	i: iterating through each weight of an individual's vector  
 	"""
-	return
+	mutation_probability = 0.2
+	for i in range(0, len(individual)):
+		if np.random.uniform(0,1) <= mutation_probability:
+			individual[i] = individual[i] + np.random.normal(0,1)
+
+	individual = np.array(list(map(lambda y: weightlimit(y), individual))) #iterating through the weights of a mutated individual to make sure they are still between [-1, 1]. 
+	return individual
 
 def compute_fitness(environment, individual):
 	"""
