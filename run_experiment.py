@@ -16,7 +16,7 @@ from nn_controller import player_controller
 import csv
 import argparse
 import numpy as np
-from evolution import initialize_generation, generate_next_generation, compute_fitness
+from evolution import initialize_generation, generate_next_generation
 
 # choose this for not using visuals and thus making experiments faster
 headless = True
@@ -49,40 +49,48 @@ environment = Environment(experiment_name=experiment_name,
                   enemymode="static",
                   level=2,
                   speed="fastest", 
-                  logs="on") # avoid logging to stdout
+                  logs="off") # avoid logging to stdout
 
 # total number of "genes" or weights in the neural network controller
 num_genes = (environment.get_num_sensors()+1)*num_hidden_neurons + (num_hidden_neurons+1)*5
 
 # repeat experiment for a total of 10 runs
 for run in range(10):
+    print("\n--- SIMULATING RUN "+str(run) + " ---")
 
-    # initialize first generation : numpy array with dimension (100, 265)
-    population_array = initialize_generation(population_size, num_genes)
-    # compute fitness scores
-    fitness_array = np.zeros((population_size,))
-    for index, individual in enumerate(population_array):
-        fitness_array[index] = compute_fitness(environment, individual)
+    # initialize first generation
+    population = initialize_generation(environment, population_size, num_genes)
 
-    # store generation 0 metrics
+    # store best individual
+    most_fit = max(population, key=lambda individual: individual.fitness)
+    best_genotype, best_fitness = most_fit.genotype, most_fit.fitness
+    np.savetxt(os.path.join(experiment_name, "run"+str(run)+"_best.txt"), best_genotype)
+
+    # store overall generation metrics
+    fitness_scores = [individual.fitness for individual in population]
+    maximum, mean, sd = most_fit.fitness, np.mean(fitness_scores), np.std(fitness_scores)
     with open(os.path.join(experiment_name, "run"+str(run)+"_results.csv"), 'w', encoding="UTF-8") as f:
         writer = csv.writer(f)
         writer.writerow(["Generation", "Max", "Mean", "SD"]) # header
-        writer.writerow([0, np.max(fitness_array), np.mean(fitness_array), np.std(fitness_array)])
-    
-    # store best individual
-    max_fitness_index = np.argmax(fitness_array)
-    best_individual, best_fitness = population_array[max_fitness_index], fitness_array[max_fitness_index]
-    np.savetxt(os.path.join(experiment_name, "run"+str(run)+"_best.txt"), best_individual)
+        print("Generation 0 : Max ({:.3f}) | Mean ({:.3f}) | SD ({:.3f})".format(maximum, mean, sd)) # logging
+        writer.writerow([0, maximum, mean, sd])
 
     # repeat num_generations times
     for iteration in range(1, num_generations):
+
         # evolve generation
-        population_array, fitness_array = generate_next_generation(environment, population_array, fitness_array)
-        max_fitness_index = np.argmax(fitness_array)
+        population = generate_next_generation(environment, population)
+
+        # update best genotype if needed
+        most_fit = max(population, key=lambda individual: individual.fitness)
+        if most_fit.fitness > best_fitness:
+            best_genotype, best_fitness = most_fit.genotype, most_fit.fitness
+            np.savetxt(os.path.join(experiment_name, "run"+str(run)+"_best.txt"), best_genotype)
+
+        # store overall generation metrics
+        fitness_scores = [individual.fitness for individual in population]
+        maximum, mean, sd = most_fit.fitness, np.mean(fitness_scores), np.std(fitness_scores)
         with open(os.path.join(experiment_name, "run"+str(run)+"_results.csv"), 'a', encoding="UTF-8") as f:
             writer = csv.writer(f)
-            writer.writerow([iteration, fitness_array[max_fitness_index], np.mean(fitness_array), np.std(fitness_array)])
-        if fitness_array[max_fitness_index] > best_fitness:
-            best_individual, best_fitness = population_array[max_fitness_index], fitness_array[max_fitness_index]
-            np.savetxt(os.path.join(experiment_name, "run"+str(run)+"_best.txt"), best_individual)
+            writer.writerow([iteration, maximum, mean, sd])
+            print("Generation {} : Max ({:.3f}) | Mean ({:.3f}) | SD ({:.3f})".format(iteration, maximum, mean, sd))
