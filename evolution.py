@@ -6,10 +6,6 @@
 import numpy as np
 
 
-# constants to use, for experimentation now:
-num_genes = 265
-fitness_population = np.array() # of fitness values of population
-
 def initialize_generation(population_size, num_genes):
 	"""
 	Randomly initializes a generation.
@@ -32,8 +28,8 @@ def generate_next_generation(environment, population, population_fitness):
 	all_children = []
 	all_children_fitness = []
 	# generate offspring
-	for i in len(parent_pairs):
-		children, children_fitness = recombine(environment, parent_pairs[i][0], parent_pairs[i][1], num_offspring=1)
+	for i in range(len(parent_pairs)):
+		children, children_fitness = create_offspring(environment, parent_pairs[i][0], parent_pairs[i][1], num_genes=265, num_offspring=1)
 		all_children.append(children)
 		all_children_fitness.append(children_fitness)
 
@@ -52,17 +48,17 @@ def parent_selection(population, population_fitness):
 	:param population_fitness: numpy array containing each individual's fitness score
 	"""
 	parent_list = []
-	population_size = population.shape[0]
+	num_pairs = int(population.shape[0]/2)
 	# iterate until we have as many parent pairs as the size of our population
-	while len(parent_list) != population_size:
+	while len(parent_list) != num_pairs:
 		# draw random sample of 5 individuals
-		sample = np.random.choice(population_size, 5, replace=False)
+		sample = np.random.choice(num_pairs, 5, replace=False)
 		# select 2 parents with highest fitness scores
 		top_2 = sorted(sample, key=lambda index : population_fitness[index])[-2:]
 		parent_list.append((population[top_2[0]], population[top_2[1]]))
 	return parent_list
 
-def recombine(environment, parent_1, parent_2, num_genes, num_offspring):
+def create_offspring(environment, parent_1, parent_2, num_genes, num_offspring):
 	"""
 	Nils
 	Generate one offspring from individuals x and y using crossover
@@ -76,35 +72,27 @@ def recombine(environment, parent_1, parent_2, num_genes, num_offspring):
 
 	# generate desired number of children
 	children = np.zeros((num_offspring, num_genes))
-	children_fitness = np.zeros((num_offspring, 1))
+	children_fitness = np.zeros((num_offspring,))
 
 	# Apply whole arithmetic recombination to create children
-	for i in len(children):
-		alpha = np.random.uniform(0,1)
-		child = alpha * parent_1 + (1 - alpha) * parent_2
+	for i in range(len(children)):
+		child = recombine(parent_1, parent_2)
 
-		# normalize each new vector between [-1, 1]
-		# put this in separate function, and choose a more appropriate scaling mechanism
-
-		# apply mutation on each child
-		child = mutate(child)
-
-		# normalize each new vector between [-1, 1]
-		# put this in separate function, and choose a more appropriate scaling mechanism
-		for j in child:
-			if j > upper_bound:
-				j = upper_bound
-			elif j < lower_bound:
-				j = lower_bound
-
-		# set child in array		
-		children[i] = child
+		# apply mutation and set child in array		
+		children[i] = mutate(child)
 
 		# set fitness score in array
 		children_fitness[i] = compute_fitness(environment, children[i])
 
 	return children, children_fitness
 
+def recombine(parent_1, parent_2):
+	"""
+	
+	"""
+	alpha = np.random.uniform(0,1)
+	child = alpha * parent_1 + (1 - alpha) * parent_2
+	return child
 
 def weightlimit(w):
 	"""
@@ -133,8 +121,9 @@ def mutate(individual):
 	for i in range(0, len(individual)):
 		if np.random.uniform(0,1) <= mutation_probability:
 			individual[i] = individual[i] + np.random.normal(0,1)
+		individual[i] = weightlimit(individual[i])
 
-	individual = np.array(list(map(lambda y: weightlimit(y), individual))) #iterating through the weights of a mutated individual to make sure they are still between [-1, 1]. 
+	# individual = np.array(list(map(lambda y: weightlimit(y), individual))) #iterating through the weights of a mutated individual to make sure they are still between [-1, 1]. 
 	return individual
 
 def compute_fitness(environment, individual):
@@ -171,22 +160,10 @@ def survival_selection(population, population_fitness, offspring, offspring_fitn
 
 	# rankings of the parent population from lowest to highest fitness
 	parent_ranking = np.argsort(population_fitness)
+
 	# choose num_parents best from the parents
 	parent_ranking = parent_ranking[-num_parents:]
 	new_population = np.vstack((new_population, population[parent_ranking,:]))
 	new_fitness = np.append(new_fitness, population_fitness[parent_ranking])
 	
 	return new_population, new_fitness
-
-# testing the function
-# parents = np.random.uniform(-1, 1, size = (10, 3))
-# print(parents)
-# fitness = np.random.normal(0, 100, size = (10,))
-# print(fitness)
-# offspring = np.random.uniform(-1, 1, size = (5, 3))
-# print(offspring)
-# offspring_fitness = np.random.normal(0, 100, size = (5,))
-# print(offspring_fitness)
-# new_population, new_fitness = survival_selection(parents, fitness, offspring, offspring_fitness)
-# print(new_population)
-# print(new_fitness)

@@ -25,7 +25,7 @@ if headless:
 
 # parses the arguments from command line
 parser = argparse.ArgumentParser()
-parser.add_argument("--pop_size", type=int, required=False, default=100)
+parser.add_argument("--pop_size", type=int, required=False, default=10)
 parser.add_argument("--num_gens", type=int, required=False, default=30)
 parser.add_argument("--num-neurons", type=int, required=False, default=10)
 parser.add_argument("--enemy", type=int, required=True)
@@ -49,7 +49,7 @@ environment = Environment(experiment_name=experiment_name,
                   enemymode="static",
                   level=2,
                   speed="fastest", 
-                  logs="off") # avoid logging to stdout
+                  logs="on") # avoid logging to stdout
 
 # total number of "genes" or weights in the neural network controller
 num_genes = (environment.get_num_sensors()+1)*num_hidden_neurons + (num_hidden_neurons+1)*5
