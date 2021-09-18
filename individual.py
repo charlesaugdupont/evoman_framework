@@ -10,11 +10,11 @@ import numpy as np
 from helpers import weight_limit
 
 class Individual:
-	def __init__(self, environment, genotype, sigma):
+	def __init__(self, genotype, sigma):
 		self.num_genes = genotype.shape[0]
 		self.genotype = genotype
 		self.sigma = sigma
-		self.fitness = self.compute_fitness(environment)
+		self.fitness = None # value is assigned by calling compute_fitness() from evolution.py 
 		self.mutation_probability = 0.2
 
 	def compute_fitness(self, environment):

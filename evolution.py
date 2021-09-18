@@ -14,7 +14,10 @@ def initialize_generation(environment, population_size, num_genes):
 	"""
 	all_genotypes = np.random.uniform(-1, 1, (population_size, num_genes))
 	all_sigmas = np.random.uniform(0.1, 1.0, (population_size,))
-	generation = [Individual(environment, all_genotypes[i], all_sigmas[i]) for i in range(population_size)]
+	generation = [Individual(all_genotypes[i], all_sigmas[i]) for i in range(population_size)]
+	# compute fitness of all individuals
+	for individual in generation:
+		individual.fitness = individual.compute_fitness(environment) 
 	return generation
 
 def generate_next_generation(environment, population):
@@ -68,14 +71,16 @@ def create_offspring(environment, parent_1, parent_2, num_offspring):
 	children = []
 	for i in range(num_offspring):
 		# apply whole arithmetic recombination to create children
-		child = recombine(environment, parent_1, parent_2)
+		child = recombine(parent_1, parent_2)
 		# apply mutation and add child to children list		
 		child.mutate()
+		# compute child's fitness after mutation
+		child.fitness = child.compute_fitness(environment)
 		children.append(child)
 
 	return children
 
-def recombine(environment, parent_1, parent_2):
+def recombine(parent_1, parent_2):
 	"""
 	Performs recombination between two parents, creating a child.
 	"""
@@ -87,7 +92,7 @@ def recombine(environment, parent_1, parent_2):
 	child_sigma = np.random.uniform(0.1, 1.0)
 
 	# return new child object
-	return Individual(environment, child_genotype, child_sigma)
+	return Individual(child_genotype, child_sigma)
 
 def survival_selection(population, offspring):
 	"""
