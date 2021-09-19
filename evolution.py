@@ -4,6 +4,7 @@
 ##################################################################################
 
 import numpy as np
+from numpy.lib.function_base import select
 from individual import Individual
 
 def initialize_generation(environment, population_size, num_genes):
@@ -26,7 +27,8 @@ def generate_next_generation(environment, population):
 	:param population: list of objects of class Individual
 	"""
 	# generate pairs of parents that can be used for recombination
-	parent_pairs = parent_selection(population)
+	#parent_pairs = parent_selection_method_1(population, num_pairs=int(len(population)/2))
+	parent_pairs = parent_selection_method_2(population, num_pairs=int(len(population)/2))
 
 	# generate offspring
 	offspring = []
@@ -39,24 +41,44 @@ def generate_next_generation(environment, population):
 
 	return new_population
 
-def parent_selection(population):
+######## PARENT SELECTION MECHANISMS ########
+def parent_selection_method_1(population, num_pairs):
 	"""
-	Returns a list of 2-tuples with size |population| containing selected parent genotype vectors.
+	Returns a list of parent pairs with size num_pairs using repeated random sampling
+	of 5 individuals, and selecting top 2.
 	:param population: list of objects of class Individual
+	:param num_pairs: how many parent pairs to return
 	"""
-	# compute desired number of parent pairings
-	num_pairs = int(len(population)/2)
-
 	# iterate until we have as many parent pairs as the size of our population
-	parent_list = []
-	while len(parent_list) != num_pairs:
+	parent_pairs = []
+	while len(parent_pairs) != num_pairs:
 		# draw random sample of 5 individuals
 		sample = np.random.choice(population, 5, replace=False)
 		# select 2 parents with highest fitness scores
 		top_2 = sorted(sample, key=lambda individual: individual.fitness)[-2:]
-		parent_list.append((top_2[0], top_2[1]))
+		parent_pairs.append((top_2[0], top_2[1]))
 
-	return parent_list
+	return parent_pairs
+
+def parent_selection_method_2(population, num_pairs):
+	"""
+	Returns a list of parent pairs using fitness-proportionate probabilistic sampling ("roulette wheel" method).
+	:param population: list of objects of class Individual
+	:param num_pairs: how many parent pairs to return
+	"""
+	fitness_scores = [individual.fitness for individual in population]
+	minimum, maximum = min(fitness_scores), max(fitness_scores)
+	# compute selection probabilities
+	selection_probs = [max(0.00000001, (f-minimum)/(maximum-minimum)) for f in fitness_scores]
+	# normalize such that they sum to 1.0
+	selection_probs = [p/sum(selection_probs) for p in selection_probs]
+	parent_pairs = []
+	while len(parent_pairs) != num_pairs:
+		selection = np.random.choice(population, 2, replace=False, p=selection_probs)
+		parent_pairs.append((selection[0], selection[1]))
+
+	return parent_pairs
+#############################################
 
 def create_offspring(environment, parent_1, parent_2, num_offspring):
 	"""
