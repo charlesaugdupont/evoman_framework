@@ -103,7 +103,7 @@ def create_offspring(environment, parent_1, parent_2, num_offspring):
 	for i in range(num_offspring):
 
 		# apply whole arithmetic recombination to create children
-		child = recombine(parent_1, parent_2, num_genes)
+		child = recombine(parent_1, parent_2)
 
 		# apply mutation and add child to children list		
 		child.mutate()
@@ -146,7 +146,7 @@ def blended_crossover(parent_1, parent_2):
 	"""
 	ref. A Crossover Operator Using Independent Component Analysis for Real-Coded Genetic Algorithms (Takahashi & Kita, 2001)
 	Can choose between two sigma methods:
-	- child_sigma(parent_1, parent_2)
+	- child_sigma_v1(parent_1, parent_2)
 	- child_sigma_v2(parent_1, parent_2)
 	"""
 	alpha = 0.5 # ref Eshelmann & Schafer
@@ -159,7 +159,7 @@ def blended_crossover(parent_1, parent_2):
 		bound_2 = max(parent_1.genotype[i], parent_2.genotype[i]) + alpha * difference
 		child_genotype.append(np.random.uniform(bound_1, bound_2))
 
-	child_sigma = child_sigma(parent_1, parent_2)
+	child_sigma = child_sigma_v1(parent_1, parent_2)
 
 	return child_genotype, child_sigma
 
@@ -168,7 +168,7 @@ def blended_crossover_v2(parent_1, parent_2):
 	"""
 	Performs recombination using the blended crossover methodology.
 	Can choose between two sigma methods:
-	- child_sigma(parent_1, parent_2)
+	- child_sigma_v1(parent_1, parent_2)
 	- child_sigma_v2(parent_1, parent_2)
 	"""
 	difference = abs(parent_1.genotype - parent_2.genotype)
@@ -186,25 +186,24 @@ def blended_crossover_v2(parent_1, parent_2):
 	child_genotype  = (1 - gamma) * parent_1.genotype + gamma * parent_2
 
 	# create child sigma
-	child_sigma = child_sigma(parent_1, parent_2)
+	child_sigma = child_sigma_v1(parent_1, parent_2)
 
 	return child_genotype, child_sigma
 
 
-def child_sigma(parent_1, parent_2):
+def child_sigma_v1(parent_1, parent_2):
 	"""
 	Using this method, sigma cannot go below 0, but above parents' max sigmoids
 	"""
-
 	# sample random number uniformly from [0,1]
 	mu = np.random.uniform(0,1)
 
 	# take difference of parents' sigma values
-	difference = max(abs(parent_1.sigma - parent_2.sigma)
+	difference = max(abs(parent_1.sigma - parent_2.sigma))
 
 	# sigma cannot be negative
 	bound_1 = max(min(parent_1.sigma, parent_2.sigma) - mu * difference, 0)
-	bound_2 = max(parent_1.sigma, parent_2.sigma) + mu * difference)
+	bound_2 = max(parent_1.sigma, parent_2.sigma) + mu * difference
 	child_sigma = np.random.uniform(bound_1, bound_2)
 
 	return child_sigma
