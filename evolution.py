@@ -106,8 +106,8 @@ def create_offspring(environment, parent_1, parent_2, num_offspring):
 		child = recombine(parent_1, parent_2, num_genes)
 
 		# apply mutation and add child to children list		
-		child.mutate()
-
+		child.mutate_self_adaptive1()
+    
 		# compute child's fitness after mutation
 		child.fitness = child.compute_fitness(environment)
 		children.append(child)
@@ -137,7 +137,9 @@ def whole_arith_recombination(parent_1, parent_2):
 	child_genotype = alpha * parent_1.genotype + (1 - alpha) * parent_2.genotype
 
 	# compute child sigma
-	child_sigma = np.random.uniform(0.1, 1.0)
+	# Eiben & Smith don't say anything about how sigma should be handled in
+	# recombination, so I chose to take the average of the two parent sigmas
+	child_sigma = np.average((parent_1.sigma, parent_2.sigma))
 
 	return child_genotype, child_sigma
 

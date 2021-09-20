@@ -15,7 +15,13 @@ class Individual:
 		self.genotype = genotype
 		self.sigma = sigma
 		self.fitness = None # value is assigned by calling compute_fitness() from evolution.py 
-		self.mutation_probability = 0.2
+		self.mutation_probability = 1.0
+		# lower limit for sigma
+		self.epsilon = 0.001
+		# according to Eiben & Smith the learning rate in self-adaptive 
+		# mutation should be inversely proportional to the square root 
+		# of the genome size
+		self.learning_rate = 2.0 * (1/np.sqrt(self.num_genes))
 
 	def compute_fitness(self, environment):
 		"""
@@ -32,3 +38,19 @@ class Individual:
 			if np.random.uniform(0,1) <= self.mutation_probability:
 				self.genotype[i] = self.genotype[i] + np.random.normal(0,1)
 			self.genotype[i] = weight_limit(self.genotype[i])
+
+	def mutate_self_adaptive1(self):
+		"""
+		Applies uncorrelated mutation with one step size to genotype. Before
+		this the step size is also mutated. 
+		Mutation happens with probability 1, i.e. self.mutation_probability is 
+		not enforced.
+		"""
+		self.sigma = self.sigma * np.exp(np.random.normal(0, self.learning_rate))
+		# prevent the step size from going too small
+		if (self.sigma < self.epsilon):
+			self.sigma = self.epsilon
+		# mutate with the updated step size
+		for i in range(0, self.num_genes):
+			self.genotype[i] = weight_limit(
+				self.genotype[i] + np.random.normal(0, self.sigma))
