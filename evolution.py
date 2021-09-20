@@ -33,7 +33,7 @@ def generate_next_generation(environment, population):
 
 	# generate pairs of parents that can be used for recombination
 	#parent_pairs = parent_selection_method_1(population, num_pairs=int(len(population)/2))
-	parent_pairs = parent_selection_method_2(population, num_pairs=int(len(population)/2))
+	parent_pairs = parent_selection_method_2(population, num_pairs=2*len(population))
 
 	# generate offspring
 	offspring = []
@@ -42,7 +42,7 @@ def generate_next_generation(environment, population):
 		offspring += children # concatenate children to offspring list
 
 	# perform survival selection to return next generation with same size as input generation
-	new_population = survival_selection(population, offspring)
+	new_population = survival_selection(offspring, len(population))
 
 	return new_population
 
@@ -76,8 +76,11 @@ def parent_selection_method_2(population, num_pairs):
 	minimum, maximum = min(fitness_scores), max(fitness_scores)
 	# compute selection probabilities
 	selection_probs = [max(0.00000001, (f-minimum)/(maximum-minimum)) for f in fitness_scores]
+	#import IPython;IPython.embed()
+
 	# normalize such that they sum to 1.0
-	selection_probs = [p/sum(selection_probs) for p in selection_probs]
+	total = sum(selection_probs)
+	selection_probs = [p/total for p in selection_probs]
 	parent_pairs = []
 	while len(parent_pairs) != num_pairs:
 		selection = np.random.choice(population, 2, replace=False, p=selection_probs)
@@ -106,7 +109,7 @@ def create_offspring(environment, parent_1, parent_2, num_offspring):
 
 		# apply mutation and add child to children list		
 		child.mutate_self_adaptive1()
-    
+	
 		# compute child's fitness after mutation
 		child.fitness = child.compute_fitness(environment)
 		children.append(child)
@@ -153,12 +156,12 @@ def blended_crossover(parent_1, parent_2):
 	alpha = 0.5 # ref Eshelmann & Schafer
 	# alpha = 0.366 # ref. (Takahashi & Kita, 2001)
 
-	child_genotype = []
+	child_genotype = np.zeros((parent_1.num_genes,))
 	for i in range(parent_1.num_genes):
 		difference = abs(parent_1.genotype[i] - parent_2.genotype[i])
 		bound_1 = min(parent_1.genotype[i], parent_2.genotype[i]) - alpha * difference
 		bound_2 = max(parent_1.genotype[i], parent_2.genotype[i]) + alpha * difference
-		child_genotype.append(np.random.uniform(bound_1, bound_2))
+		child_genotype[i] = np.random.uniform(bound_1, bound_2)
 
 	child_sigma = child_sigma_v1(parent_1, parent_2)
 
@@ -200,10 +203,10 @@ def child_sigma_v1(parent_1, parent_2):
 	mu = np.random.uniform(0,1)
 
 	# take difference of parents' sigma values
-	difference = max(abs(parent_1.sigma - parent_2.sigma))
+	difference = abs(parent_1.sigma - parent_2.sigma)
 
 	# sigma cannot be negative
-	bound_1 = max(min(parent_1.sigma, parent_2.sigma) - mu * difference, 0)
+	bound_1 = max(min(parent_1.sigma, parent_2.sigma) - mu * difference, parent_1.epsilon)
 	bound_2 = max(parent_1.sigma, parent_2.sigma) + mu * difference
 	child_sigma = np.random.uniform(bound_1, bound_2)
 
@@ -223,31 +226,30 @@ def child_sigma_v2(parent_1, parent_2):
 	return child_sigma
 
 def survival_selection(offspring, population_size):
-    elitism = 0.1*len(offspring)
-    leftover = population_size - elitism
+	elitism = int(0.1*len(offspring))
+	leftover = population_size - elitism
+	sorted_offspring = sorted(offspring, key = lambda individual: individual.fitness)
+	best_offspring = sorted_offspring[-elitism:]
 
-    #The best 20 offspring always survives 
-    best_offspring = list(sorted(offspring, key = lambda individual: individual.fitness)[-elitism:])
+	#Pairwise tournament: the offspring with the higher fitness from the tournament survives.
+	#This is repeated until we filled up the remaining "leftover" spots. 
 
-    #Pairwise tournament: the offspring with the higher fitness from the tournament survives.
-    #This is repeated until we filled up the remaining "leftover" spots. 
-    tournament_offspring = []
-    
-    while len(tournament_offspring) < leftover: 
-        x = list(sorted(offspring, key = lambda individual: individual.fitness)[:leftover])
-        potential1 = np.random.choice(x, 1, replace = False)
-        potential2 = np.random.choice(x, 1, replace = False)
-        
-        #the tournament
-        if potential1.fitness >= potential2.fitness:
-            tournament_offspring.append(potential1)
-        else:
-            tournament_offspring.append(potential2)
-        return tournament_offspring
-    
-    #constructing the new population consisting of these two groups of offspring
-    new_population = best_offspring + tournament_offspring 
-    return new_population
+	tournament_offspring = []
+	
+	while len(tournament_offspring) < leftover: 
+		x = sorted_offspring[:leftover]
+		potential1 = np.random.choice(x, 1, replace = False)[0]
+		potential2 = np.random.choice(x, 1, replace = False)[0]
+
+		#the tournament
+		if potential1.fitness >= potential2.fitness:
+			tournament_offspring.append(potential1)
+		else:
+			tournament_offspring.append(potential2)
+	
+	#constructing the new population consisting of these two groups of offspring
+	new_population = best_offspring + tournament_offspring 
+	return new_population
 
 #note: we would have to delete the "population" input from the survival_selection in def generate_next_generation
 #we would also have to make num_offspring = 2 in def generate_next_generation
