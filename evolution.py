@@ -13,7 +13,7 @@ def initialize_generation(environment, population_size, num_genes):
 	:param num_genes: total number of weights in neural network controller
 	"""
 	all_genotypes = np.random.uniform(-1, 1, (population_size, num_genes))
-	all_sigmas = np.random.uniform(0.1, 1.0, (population_size,))
+	all_sigmas = np.random.uniform(0.1, 1.0, (population_size, num_genes))
 	generation = [Individual(all_genotypes[i], all_sigmas[i]) for i in range(population_size)]
 	# compute fitness of all individuals
 	for individual in generation:
