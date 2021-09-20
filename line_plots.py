@@ -40,9 +40,9 @@ plt.fill_between(np.arange(1, num_generations+1), max_fitness_mean-max_fitness_s
 plt.xlabel("Generation")
 plt.ylabel("Fitness")
 if algorithm == "GA":
-	plt.title("Genetic Algorithm")
+	plt.title("EA1 : Genetic Algorithm")
 else:
-	pass # add title for our second algorithm
+	plt.title("EA2 : -") # TODO: add proper name !
 plt.grid()
 plt.legend()
 fig.savefig(os.path.join(experiment_name, "line_plot.png"), dpi=fig.dpi)
