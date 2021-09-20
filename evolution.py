@@ -13,7 +13,6 @@ def initialize_generation(environment, population_size, num_genes):
 	:param population_size: number of individuals in population
 	:param num_genes: total number of weights in neural network controller
 	"""
-
 	# initialize all individuals in the population 
 	all_genotypes = np.random.uniform(-1, 1, (population_size, num_genes))
 	all_sigmas = np.random.uniform(0.1, 1.0, (population_size,))
