@@ -21,7 +21,7 @@ class Individual:
 		# according to Eiben & Smith the learning rate in self-adaptive 
 		# mutation should be inversely proportional to the square root 
 		# of the genome size
-		self.learning_rate = 2.0 * (1/np.sqrt(self.num_genes))
+		self.learning_rate = 0.02 * (1/np.sqrt(self.num_genes))
 
 	def compute_fitness(self, environment):
 		"""
