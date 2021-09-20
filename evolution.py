@@ -32,8 +32,8 @@ def generate_next_generation(environment, population):
 	"""
 
 	# generate pairs of parents that can be used for recombination
-	parent_pairs = parent_selection_method_1(population, num_pairs=int(len(population)/2))
-	#parent_pairs = parent_selection_method_2(population, num_pairs=2*len(population))
+	#parent_pairs = parent_selection_method_1(population, num_pairs=int(len(population)/2))
+	parent_pairs = parent_selection_method_2(population, num_pairs=int(len(population)/2))
 
 	# generate offspring
 	offspring = []
@@ -125,7 +125,7 @@ def recombine(parent_1, parent_2):
 	- blended_crossover
 	- blended_crossover_v2
 	"""
-	child_genotype, child_sigma = whole_arith_recombination(parent_1, parent_2)
+	child_genotype, child_sigma = blended_crossover(parent_1, parent_2)
 
 	# return new child object
 	return Individual(child_genotype, child_sigma)
