@@ -106,8 +106,8 @@ def create_offspring(environment, parent_1, parent_2, num_offspring):
 		child = recombine(parent_1, parent_2)
 
 		# apply mutation and add child to children list		
-		child.mutate()
-
+		child.mutate_self_adaptive1()
+    
 		# compute child's fitness after mutation
 		child.fitness = child.compute_fitness(environment)
 		children.append(child)
@@ -137,7 +137,9 @@ def whole_arith_recombination(parent_1, parent_2):
 	child_genotype = alpha * parent_1.genotype + (1 - alpha) * parent_2.genotype
 
 	# compute child sigma
-	child_sigma = np.random.uniform(0.1, 1.0)
+	# Eiben & Smith don't say anything about how sigma should be handled in
+	# recombination, so I chose to take the average of the two parent sigmas
+	child_sigma = np.average((parent_1.sigma, parent_2.sigma))
 
 	return child_genotype, child_sigma
 
@@ -221,23 +223,32 @@ def child_sigma_v2(parent_1, parent_2):
 
 	return child_sigma
 
-def survival_selection(population, offspring):
-	"""
-	Choose which individuals from the (parent) population and from the offspring 
-	survive to the next generation.
+def survival_selection(offspring, population_size):
+    elitism = 0.1*len(offspring)
+    leftover = population_size - elitism
 
-	Currently, all the offspring are selected, and the remaining spots are filled from the population based
-	on fitness from highest to lowest. It is assumed that the number of offspring is no more
-	than the size of the population.
+    #The best 20 offspring always survives 
+    best_offspring = list(sorted(offspring, key = lambda individual: individual.fitness)[-elitism:])
 
-	:param population: list of objects of class Individual representing the parent (current) population
-	:param offspring: list of objects of class Individual representing the generated offspring
-	:return value: list of objects of class Individual with length equal to size of parent population 
-	"""
-	# compute how many parents we will select to survive
-	num_parents = len(population) - len(offspring)
+    #Pairwise tournament: the offspring with the higher fitness from the tournament survives.
+    #This is repeated until we filled up the remaining "leftover" spots. 
+    tournament_offspring = []
+    
+    while len(tournament_offspring) < leftover: 
+        x = list(sorted(offspring, key = lambda individual: individual.fitness)[:leftover])
+        potential1 = np.random.choice(x, 1, replace = False)
+        potential2 = np.random.choice(x, 1, replace = False)
+        
+        #the tournament
+        if potential1.fitness >= potential2.fitness:
+            tournament_offspring.append(potential1)
+        else:
+            tournament_offspring.append(potential2)
+        return tournament_offspring
+    
+    #constructing the new population consisting of these two groups of offspring
+    new_population = best_offspring + tournament_offspring 
+    return new_population
 
-	# construct new population consisting of ALL offspring, and the most fit parents for the remaining spots
-	new_population = offspring + sorted(population, key=lambda individual: individual.fitness)[-num_parents:]
-
-	return new_population
+#note: we would have to delete the "population" input from the survival_selection in def generate_next_generation
+#we would also have to make num_offspring = 2 in def generate_next_generation
