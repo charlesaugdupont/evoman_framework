@@ -52,8 +52,8 @@ class Individual:
 		# update sigma, first with overall learning rate, then gene-wise
 		self.sigma = self.sigma * np.exp(np.random.normal(0, self.overall_learning_rate))
 		self.sigma = self.sigma * np.exp(np.random.multivariate_normal(
-			mean = np.zeros(self.num_genes,
-			cov = self.gene_learning_rate * np.eye(self.num_genes))
+			mean = np.zeros(self.num_genes),
+			cov = self.gene_learning_rate * np.eye(self.num_genes)
 		))
 		# prevent the step size from going too small
 		too_small = self.sigma < self.epsilon
