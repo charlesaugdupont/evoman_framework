@@ -28,6 +28,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--pop_size", type=int, required=False, default=10)
 parser.add_argument("--num_gens", type=int, required=False, default=30)
 parser.add_argument("--num-neurons", type=int, required=False, default=10)
+parser.add_argument("--algorithm", type=str, required=False, default="GA")
 parser.add_argument("--enemy", type=int, required=True)
 args = parser.parse_args()
 
@@ -35,21 +36,22 @@ population_size = args.pop_size
 num_generations = args.num_gens
 num_hidden_neurons = args.num_neurons
 enemy = args.enemy
+algorithm = args.algorithm
 
 # sets up experiment results folder for logs
-experiment_name = "experiment_results/"+"enemy"+str(enemy)
+experiment_name = os.path.join("experiment_results", algorithm, "enemy"+str(enemy))
 if not os.path.exists(experiment_name):
     os.makedirs(experiment_name)
 
 # initialize environment
 environment = Environment(experiment_name=experiment_name,
-                  enemies=[enemy],
-                  playermode="ai",
-                  player_controller=player_controller(num_hidden_neurons),
-                  enemymode="static",
-                  level=2,
-                  speed="fastest", 
-                  logs="off") # avoid logging to stdout
+                enemies=[enemy],
+                playermode="ai",
+                player_controller=player_controller(num_hidden_neurons),
+                enemymode="static",
+                level=2,
+                speed="fastest", 
+                logs="off") # avoid logging to stdout
 
 # total number of "genes" or weights in the neural network controller
 num_genes = (environment.get_num_sensors()+1)*num_hidden_neurons + (num_hidden_neurons+1)*5
