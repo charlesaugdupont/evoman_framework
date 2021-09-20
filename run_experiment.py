@@ -19,9 +19,14 @@ import numpy as np
 from evolution import initialize_generation, generate_next_generation
 
 # choose this for not using visuals and thus making experiments faster
-headless = True
+headless = False
 if headless:
     os.environ["SDL_VIDEODRIVER"] = "dummy"
+
+# should progress be live-plotted
+progress_visualisation = True
+if progress_visualisation:
+    from progress_visualisation import initialise_progress_plot, plot_progress
 
 # parses the arguments from command line
 parser = argparse.ArgumentParser()
@@ -56,6 +61,9 @@ environment = Environment(experiment_name=experiment_name,
 # total number of "genes" or weights in the neural network controller
 num_genes = (environment.get_num_sensors()+1)*num_hidden_neurons + (num_hidden_neurons+1)*5
 
+if progress_visualisation:
+    fig, axs = initialise_progress_plot()
+
 # repeat experiment for a total of 10 runs
 for run in range(10):
     print("\n--- SIMULATING RUN "+str(run) + " ---")
@@ -77,6 +85,9 @@ for run in range(10):
         print("Generation 0 : Max ({:.3f}) | Mean ({:.3f}) | SD ({:.3f})".format(maximum, mean, sd)) # logging
         writer.writerow([0, maximum, mean, sd])
 
+    if progress_visualisation:
+        plot_progress(fig, axs, population, fitness_scores, 0)
+
     # repeat num_generations times
     for iteration in range(1, num_generations):
 
@@ -96,3 +107,6 @@ for run in range(10):
             writer = csv.writer(f)
             writer.writerow([iteration, maximum, mean, sd])
             print("Generation {} : Max ({:.3f}) | Mean ({:.3f}) | SD ({:.3f})".format(iteration, maximum, mean, sd))
+
+        if progress_visualisation:
+            plot_progress(fig, axs, population, fitness_scores, iteration)
