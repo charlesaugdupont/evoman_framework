@@ -21,17 +21,17 @@ experiment_name = os.path.join("experiment_results", algorithm, "enemy"+str(enem
 # choose this for not using visuals and thus making experiments faster
 headless = True
 if headless:
-    os.environ["SDL_VIDEODRIVER"] = "dummy"
+	os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 # initialize environment
 environment = Environment(experiment_name=experiment_name,
-                enemies=[enemy],
-                playermode="ai",
-                player_controller=player_controller(num_hidden_neurons),
-                enemymode="static",
-                level=2,
-                speed="fastest", 
-                logs="off") # avoid logging to stdout
+				enemies=[enemy],
+				playermode="ai",
+				player_controller=player_controller(num_hidden_neurons),
+				enemymode="static",
+				level=2,
+				speed="fastest", 
+				logs="off") # avoid logging to stdout
 
 # read data
 best_solutions = []
@@ -41,16 +41,20 @@ for f in os.listdir(experiment_name):
 
 # simulate each solution 5 times and compute average gains
 means = []
-for solution in best_solutions:
+for index, solution in enumerate(best_solutions):
+	print("\n- SOLUTION "+str(index+1) + " -")
 	total_gain = 0
 	for trial in range(5):
 		fitness, player_energy, enemy_energy, time = environment.play(pcont=solution)
-		total_gain += (player_energy - enemy_energy)
+		gain = player_energy - enemy_energy
+		print("Run {} Gain = {}".format(trial+1, gain))
+		total_gain += gain
 	means.append(total_gain/5)
 
 # create plot
 fig = plt.figure()
-plt.boxplot(means)
+plt.boxplot(means, labels=["EA1"])
 plt.grid()
-plt.show()
+plt.ylabel("Gain")
+plt.title("Performance of Best Solutions (Enemy {})".format(enemy))
 fig.savefig(os.path.join(experiment_name, "box_plot.png"), dpi=fig.dpi)
