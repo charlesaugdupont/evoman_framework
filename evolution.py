@@ -42,7 +42,7 @@ def generate_next_generation(environment, population):
 		offspring += children # concatenate children to offspring list	
 
 	# perform survival selection to return next generation with same size as input generation
-	new_population = survival_selection(offspring, len(population))
+	new_population = survival_selection_finest(offspring, len(population))
 
 	return new_population
 
@@ -297,3 +297,9 @@ def survival_selection_old(population, offspring):
 	num_parents = len(population) - len(offspring)
 	new_population = offspring + sorted(population, key = lambda individual: individual.fitness)[-num_parents:]
 	return new_population
+
+def survival_selection_finest(offspring, population_size):
+	sorted_offspring = sorted(offspring, key = lambda individual: individual.fitness)
+	best_offspring = sorted_offspring[-population_size:]
+
+	return best_offspring
