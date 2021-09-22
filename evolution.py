@@ -126,7 +126,7 @@ def create_offspring(environment, parent_1, parent_2, num_offspring):
 		child = recombine(parent_1, parent_2)
 
 		# apply mutation and add child to children list		
-		child.mutate_self_adaptive()
+		child.mutate()
 	
 		# compute child's fitness after mutation
 		child.fitness = child.compute_fitness(environment)
@@ -143,7 +143,7 @@ def recombine(parent_1, parent_2):
 	- blended_crossover
 	- blended_crossover_v2
 	"""
-	child_genotype, child_sigma = blended_crossover(parent_1, parent_2)
+	child_genotype, child_sigma = whole_arith_recombination(parent_1, parent_2)
 
 	# return new child object
 	return Individual(child_genotype, child_sigma)
