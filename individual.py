@@ -23,8 +23,8 @@ class Individual:
 		# the square root of the genome size, and the gene-wise learning rate
 		# should be inversely proportional to sqrt(2*sqrt(n)) (n = size of
 		# genome)
-		self.common_learning_rate = 0.01 * (1/np.sqrt(2*self.num_genes))
-		self.gene_learning_rate = 0.01 * (1/np.sqrt(2*np.sqrt(self.num_genes)))
+		self.common_learning_rate = 0.1 * (1/np.sqrt(2*self.num_genes))
+		self.gene_learning_rate = 0.1 * (1/np.sqrt(2*np.sqrt(self.num_genes)))
 
 	def compute_fitness(self, environment):
 		"""
