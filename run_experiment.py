@@ -66,7 +66,7 @@ if progress_visualisation:
 
 # repeat experiment for a total of 10 runs
 for run in range(10):
-    print("\n--- SIMULATING RUN "+str(run) + " ---")
+    print("\n--- SIMULATING RUN "+str(run+1) + " ---")
 
     # initialize first generation
     population = initialize_generation(environment, population_size, num_genes)
@@ -82,7 +82,7 @@ for run in range(10):
     with open(os.path.join(experiment_name, "run"+str(run)+"_results.csv"), 'w', encoding="UTF-8") as f:
         writer = csv.writer(f)
         writer.writerow(["Generation", "Max", "Mean", "SD"]) # header
-        print("Generation 0 : Max ({:.3f}) | Mean ({:.3f}) | SD ({:.3f})".format(maximum, mean, sd)) # logging
+        print("Generation 1 : Max ({:.3f}) | Mean ({:.3f}) | SD ({:.3f})".format(maximum, mean, sd)) # logging
         writer.writerow([0, maximum, mean, sd])
 
     if progress_visualisation:
@@ -106,7 +106,7 @@ for run in range(10):
         with open(os.path.join(experiment_name, "run"+str(run)+"_results.csv"), 'a', encoding="UTF-8") as f:
             writer = csv.writer(f)
             writer.writerow([iteration, maximum, mean, sd])
-            print("Generation {} : Max ({:.3f}) | Mean ({:.3f}) | SD ({:.3f})".format(iteration, maximum, mean, sd))
+            print("Generation {} : Max ({:.3f}) | Mean ({:.3f}) | SD ({:.3f})".format(iteration+1, maximum, mean, sd))
 
         if progress_visualisation:
             plot_progress(fig, axs, population, fitness_scores, iteration)
