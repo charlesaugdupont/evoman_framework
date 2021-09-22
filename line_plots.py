@@ -40,7 +40,7 @@ plt.fill_between(np.arange(1, num_generations+1), max_fitness_mean-max_fitness_s
 plt.xlabel("Generation")
 plt.ylabel("Fitness")
 if algorithm == "GA":
-	plt.title("EA1 : Genetic Algorithm")
+	plt.title("EA1 : Genetic Algorithm (Enemy {})".format(enemy))
 else:
 	plt.title("EA2 : -") # TODO: add proper name !
 plt.grid()

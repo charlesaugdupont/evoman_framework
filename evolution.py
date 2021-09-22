@@ -4,7 +4,6 @@
 ##################################################################################
 
 import numpy as np
-from numpy.lib.function_base import select
 from individual import Individual
 
 def initialize_generation(environment, population_size, num_genes):
@@ -32,22 +31,23 @@ def generate_next_generation(environment, population):
 	"""
 
 	# generate pairs of parents that can be used for recombination
-	#parent_pairs = parent_selection_method_1(population, num_pairs=int(len(population)/2))
-	parent_pairs = parent_selection_method_2(population, num_pairs=int(len(population)/2))
+	#parent_pairs = parent_selection_method_sampling(population, num_pairs=int(len(population)/2))
+	#parent_pairs = parent_selection_method_fps(population, num_pairs=int(len(population)/2))
+	parent_pairs = parent_selection_ranking(population, num_pairs=int(len(population)/2))
 
 	# generate offspring
 	offspring = []
 	for i in range(len(parent_pairs)):
 		children = create_offspring(environment, parent_pairs[i][0], parent_pairs[i][1], num_offspring=1)
-		offspring += children # concatenate children to offspring list
+		offspring += children # concatenate children to offspring list	
 
 	# perform survival selection to return next generation with same size as input generation
 	new_population = survival_selection_old(population, offspring)
 
 	return new_population
 
-######## PARENT SELECTION MECHANISMS ########
-def parent_selection_method_1(population, num_pairs):
+################ PARENT SELECTION MECHANISMS ################
+def parent_selection_method_sampling(population, num_pairs):
 	"""
 	Returns a list of parent pairs with size num_pairs using repeated random sampling
 	of 5 individuals, and selecting top 2.
@@ -66,7 +66,7 @@ def parent_selection_method_1(population, num_pairs):
 
 	return parent_pairs
 
-def parent_selection_method_2(population, num_pairs):
+def parent_selection_method_fps(population, num_pairs):
 	"""
 	Returns a list of parent pairs using fitness-proportionate probabilistic sampling ("roulette wheel" method).
 	:param population: list of objects of class Individual
@@ -86,7 +86,28 @@ def parent_selection_method_2(population, num_pairs):
 		parent_pairs.append((selection[0], selection[1]))
 
 	return parent_pairs
-#############################################
+
+def parent_selection_ranking(population, num_pairs, s=1.5):
+	"""
+	Rank-based parent selection using linear ranking (with s = 1.5)
+	"""
+	# compute linearly adjusted ranks
+	pop_size = len(population)
+	sorted_population = sorted(population, key = lambda individual: individual.fitness)
+
+	# compute linearly adjusted ranks
+	selection_probs = []
+	for i in range(len(sorted_population)):
+		selection_probs.append(((2-s)/pop_size) + 2*i*(s-1)/(pop_size*(pop_size-1)))
+
+	# sample random parent pairs
+	parent_pairs = []
+	while len(parent_pairs) != num_pairs:
+		selection = np.random.choice(sorted_population, 2, replace=False, p=selection_probs)
+		parent_pairs.append((selection[0], selection[1]))
+
+	return parent_pairs
+#############################################################
 
 
 def create_offspring(environment, parent_1, parent_2, num_offspring):
@@ -98,11 +119,9 @@ def create_offspring(environment, parent_1, parent_2, num_offspring):
 	:param num_offspring: number of offspring to generate from the parent pair
 	This function applies whole arithmetic recombination (Eiben & Smith, 2015, p. 66)
 	"""
-
 	# create num_offspring children from the parent pair
 	children = []
 	for i in range(num_offspring):
-
 		# apply whole arithmetic recombination to create children
 		child = recombine(parent_1, parent_2)
 
