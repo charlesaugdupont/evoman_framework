@@ -12,11 +12,13 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--enemy", type=int, required=True)
 parser.add_argument("--algorithm", type=str, required=False, default="GA")
 parser.add_argument("--num-neurons", type=int, required=False, default=10)
+parser.add_argument("--version", type=str, required=True)
 args = parser.parse_args()
 enemy = args.enemy
 algorithm = args.algorithm
+version = args.version
 num_hidden_neurons = int(args.num_neurons)
-experiment_name = os.path.join("experiment_results", algorithm, "enemy"+str(enemy))
+experiment_name = os.path.join("experiment_results", algorithm, version, "enemy"+str(enemy))
 
 # choose this for not using visuals and thus making experiments faster
 headless = True
