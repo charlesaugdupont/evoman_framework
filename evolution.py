@@ -15,7 +15,7 @@ def initialize_generation(environment, population_size, num_genes):
 	"""
 	# initialize all individuals in the population 
 	all_genotypes = np.random.uniform(-1, 1, (population_size, num_genes))
-	all_sigmas = np.random.uniform(0.1, 1.0, (population_size,))
+	all_sigmas = np.random.uniform(0.1, 1.0, (population_size, num_genes))
 	generation = [Individual(all_genotypes[i], all_sigmas[i]) for i in range(population_size)]
 
 	# compute fitness of all individuals
@@ -76,7 +76,6 @@ def parent_selection_method_2(population, num_pairs):
 	minimum, maximum = min(fitness_scores), max(fitness_scores)
 	# compute selection probabilities
 	selection_probs = [max(0.00000001, (f-minimum)/(maximum-minimum)) for f in fitness_scores]
-	#import IPython;IPython.embed()
 
 	# normalize such that they sum to 1.0
 	total = sum(selection_probs)
@@ -108,7 +107,7 @@ def create_offspring(environment, parent_1, parent_2, num_offspring):
 		child = recombine(parent_1, parent_2)
 
 		# apply mutation and add child to children list		
-		child.mutate_self_adaptive1()
+		child.mutate_self_adaptive()
 	
 		# compute child's fitness after mutation
 		child.fitness = child.compute_fitness(environment)
@@ -163,7 +162,7 @@ def blended_crossover(parent_1, parent_2):
 		bound_2 = max(parent_1.genotype[i], parent_2.genotype[i]) + alpha * difference
 		child_genotype[i] = np.random.uniform(bound_1, bound_2)
 
-	child_sigma = child_sigma_v1(parent_1, parent_2)
+	child_sigma = child_sigma_v3(parent_1, parent_2)
 
 	return child_genotype, child_sigma
 
@@ -222,6 +221,28 @@ def child_sigma_v2(parent_1, parent_2):
 
 	# let sigma stay between bounds [0,1]
 	child_sigma = mu * parent_1.sigma + (1 - mu) * parent_2.sigma
+
+	return child_sigma
+
+def child_sigma_v3(parent_1, parent_2):
+	"""
+	Sigma calculation for the self-adapting mutation with n step sizes.
+	I imitated the structure of child_sigma_v1
+	"""
+	# sample random number uniformly from [0,1]
+	mu = np.random.uniform(0,1)
+
+	# take difference of parents' sigma values
+	difference = np.abs(parent_1.sigma - parent_2.sigma)
+
+	child_sigma = np.zeros((parent_1.num_genes,))
+	for i in range(parent_1.num_genes):
+		difference = abs(parent_1.sigma[i] - parent_2.sigma[i])
+		bound_1 = min(parent_1.sigma[i], parent_2.sigma[i]) - mu * difference
+		# make sure sigma is positive
+		bound_1 = max(bound_1, parent_1.epsilon)
+		bound_2 = max(parent_1.sigma[i], parent_2.sigma[i]) + mu * difference
+		child_sigma[i] = np.random.uniform(bound_1, bound_2)
 
 	return child_sigma
 
