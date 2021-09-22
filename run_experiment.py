@@ -19,18 +19,18 @@ import numpy as np
 from evolution import initialize_generation, generate_next_generation
 
 # choose this for not using visuals and thus making experiments faster
-headless = False
+headless = True
 if headless:
     os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 # should progress be live-plotted
-progress_visualisation = True
+progress_visualisation = False
 if progress_visualisation:
     from progress_visualisation import initialise_progress_plot, plot_progress
 
 # parses the arguments from command line
 parser = argparse.ArgumentParser()
-parser.add_argument("--pop_size", type=int, required=False, default=10)
+parser.add_argument("--pop_size", type=int, required=False, default=30)
 parser.add_argument("--num_gens", type=int, required=False, default=30)
 parser.add_argument("--num-neurons", type=int, required=False, default=10)
 parser.add_argument("--algorithm", type=str, required=False, default="GA")
