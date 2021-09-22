@@ -39,7 +39,7 @@ class Individual:
 		"""
 		for i in range(0, self.num_genes):
 			if np.random.uniform(0,1) <= self.mutation_probability:
-				self.genotype[i] = self.genotype[i] + np.random.normal(0,1)
+				self.genotype[i] = self.genotype[i] + np.random.normal(0,0.4)
 			self.genotype[i] = weight_limit(self.genotype[i])
 
 	def mutate_self_adaptive(self):
