@@ -35,6 +35,7 @@ parser.add_argument("--num_gens", type=int, required=False, default=30)
 parser.add_argument("--num-neurons", type=int, required=False, default=10)
 parser.add_argument("--algorithm", type=str, required=False, default="GA")
 parser.add_argument("--enemy", type=int, required=True)
+parser.add_argument("--version", type=str, required=True)
 args = parser.parse_args()
 
 population_size = args.pop_size
@@ -42,9 +43,10 @@ num_generations = args.num_gens
 num_hidden_neurons = args.num_neurons
 enemy = args.enemy
 algorithm = args.algorithm
+version = args.version
 
 # sets up experiment results folder for logs
-experiment_name = os.path.join("experiment_results", algorithm, "enemy"+str(enemy))
+experiment_name = os.path.join("experiment_results", algorithm, version, "enemy"+str(enemy))
 if not os.path.exists(experiment_name):
     os.makedirs(experiment_name)
 
