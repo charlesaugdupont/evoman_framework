@@ -31,7 +31,7 @@ if progress_visualisation:
 # parses the arguments from command line
 parser = argparse.ArgumentParser()
 parser.add_argument("--pop_size", type=int, required=False, default=30)
-parser.add_argument("--num_gens", type=int, required=False, default=30)
+parser.add_argument("--num_gens", type=int, required=False, default=40)
 parser.add_argument("--num-neurons", type=int, required=False, default=10)
 parser.add_argument("--algorithm", type=str, required=False, default="GA")
 parser.add_argument("--enemy", type=int, required=True)
@@ -84,14 +84,14 @@ for run in range(10):
     with open(os.path.join(experiment_name, "run"+str(run)+"_results.csv"), 'w', encoding="UTF-8") as f:
         writer = csv.writer(f)
         writer.writerow(["Generation", "Max", "Mean", "SD"]) # header
-        print("Generation 1 : Max ({:.3f}) | Mean ({:.3f}) | SD ({:.3f})".format(maximum, mean, sd)) # logging
+        print("Generation 0 : Max ({:.3f}) | Mean ({:.3f}) | SD ({:.3f})".format(maximum, mean, sd)) # logging
         writer.writerow([0, maximum, mean, sd])
 
     if progress_visualisation:
         plot_progress(fig, axs, population, fitness_scores, 0)
 
     # repeat num_generations times
-    for iteration in range(1, num_generations):
+    for iteration in range(1, num_generations+1):
 
         # evolve generation
         population = generate_next_generation(environment, population)
@@ -108,7 +108,7 @@ for run in range(10):
         with open(os.path.join(experiment_name, "run"+str(run)+"_results.csv"), 'a', encoding="UTF-8") as f:
             writer = csv.writer(f)
             writer.writerow([iteration, maximum, mean, sd])
-            print("Generation {} : Max ({:.3f}) | Mean ({:.3f}) | SD ({:.3f})".format(iteration+1, maximum, mean, sd))
+            print("Generation {} : Max ({:.3f}) | Mean ({:.3f}) | SD ({:.3f})".format(iteration, maximum, mean, sd))
 
         if progress_visualisation:
             plot_progress(fig, axs, population, fitness_scores, iteration)
