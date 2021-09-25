@@ -35,10 +35,10 @@ num_generations = len(mean_fitness_mean)
 
 # create plot
 fig = plt.figure()
-plt.plot(np.arange(0, num_generations+1), mean_fitness_mean, 'r', label="mean")
-plt.fill_between(np.arange(0, num_generations+1), mean_fitness_mean-mean_fitness_sd, mean_fitness_mean+mean_fitness_sd, color='salmon', alpha=0.5)
-plt.plot(np.arange(0, num_generations+1), max_fitness_mean, 'b', label="max")
-plt.fill_between(np.arange(0, num_generations+1), max_fitness_mean-max_fitness_sd, max_fitness_mean+max_fitness_sd, color='skyblue', alpha=0.5)
+plt.plot(np.arange(0, num_generations), mean_fitness_mean, 'r', label="mean")
+plt.fill_between(np.arange(0, num_generations), mean_fitness_mean-mean_fitness_sd, mean_fitness_mean+mean_fitness_sd, color='salmon', alpha=0.5)
+plt.plot(np.arange(0, num_generations), max_fitness_mean, 'b', label="max")
+plt.fill_between(np.arange(0, num_generations), max_fitness_mean-max_fitness_sd, max_fitness_mean+max_fitness_sd, color='skyblue', alpha=0.5)
 plt.xlabel("Generation")
 plt.ylabel("Fitness")
 if algorithm == "GA":
