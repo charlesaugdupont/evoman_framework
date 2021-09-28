@@ -45,17 +45,18 @@ for f in os.listdir(experiment_name):
 means = []
 for index, solution in enumerate(best_solutions):
 	print("\n- SOLUTION "+str(index+1) + " -")
-	total_fitness = 0
+	total_gain = 0
 	for trial in range(5):
-		fitness, _, _, _ = environment.play(pcont=solution)
-		print("Run {} Fitness = {}".format(trial+1, fitness))
-		total_fitness += fitness
-	means.append(total_fitness/5)
+		fitness, player_energy, enemy_energy, time = environment.play(pcont=solution)
+		gain = player_energy - enemy_energy
+		print("Run {} Gain = {}".format(trial+1, gain))
+		total_gain += gain
+	means.append(total_gain/5)
 
 # create plot
 fig = plt.figure()
 plt.boxplot(means, labels=["EA1"])
 plt.grid()
-plt.ylabel("Fitness")
+plt.ylabel("Gain")
 plt.title("Performance of Best Solutions (Enemy {})".format(enemy))
 fig.savefig(os.path.join(experiment_name, "box_plot.png"), dpi=fig.dpi)
