@@ -15,7 +15,7 @@ class Individual:
 
 	def __init__(self, genotype):
 		"""
-		Creates object of class Individual.
+		Creates object of class Individual
 		:param genotype: numpy vector of length 265.
 		"""
 		self.num_genes = genotype.shape[0]
@@ -25,7 +25,7 @@ class Individual:
 
 	def compute_fitness(self, environment):
 		"""
-		Computes fitness score and assigns it to fitness attribute.
+		Computes fitness score and assigns it to fitness attribute
 		:param environment: (simulation) environment object
 		"""
 		fitness,_,_,_ = environment.play(pcont=self.genotype)
@@ -34,8 +34,8 @@ class Individual:
 	def mutate(self):
 		"""
 		Applies mutation to genotype by introducing gaussian noise
-		from a normal distribution with mean 0 and step size 0.1.
-		The mutation probability is set to 0.7. 
+		from a normal distribution with mean 0 and step size 0.1
+		The mutation probability is set to 0.7
 		"""
 		for i in range(0, self.num_genes):
 			if np.random.uniform(0,1) <= self.mutation_probability:

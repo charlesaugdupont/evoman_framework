@@ -1,6 +1,6 @@
 ##################################################################################
 # This file contains the main methods for doing simulation, evolution, 
-# implementing our two evolutioanry strategies.
+# implementing our two evolutionary strategies.
 ##################################################################################
 
 
@@ -10,7 +10,7 @@ from individual import Individual
 
 def initialize_generation(environment, population_size, num_genes):
 	"""
-	Randomly initializes a generation by returning list of objects of class Individual.
+	Randomly initializes a generation by returning list of objects of class Individual
 	:param population_size: number of individuals in population
 	:param num_genes: total number of weights in neural network controller
 	"""
@@ -27,7 +27,7 @@ def initialize_generation(environment, population_size, num_genes):
 
 def generate_next_generation(environment, population):
 	"""
-	Generates next generation from current population.
+	Generates next generation from current population
 	:param environment: (simulation) environment object
 	:param population: list of objects of class Individual
 	"""
@@ -96,8 +96,8 @@ def create_offspring(environment, parent_1, parent_2, num_offspring):
 
 def recombine(parent_1, parent_2):
 	"""
-	Performs recombination between two parents, creating a child.
-	Use blend_crossover for ES1 and whole_arith_recombination for ES2.
+	Performs recombination between two parents, creating a child
+	Use blend_crossover for ES1 and whole_arith_recombination for ES2
 	:param parent_1: first parent object of class Individual
 	:param parent_2: first parent object of class Individual
 	"""
@@ -124,7 +124,9 @@ def whole_arith_recombination(parent_1, parent_2):
 
 def blend_crossover(parent_1, parent_2):
 	"""
-	ref. A Crossover Operator Using Independent Component Analysis for Real-Coded Genetic Algorithms (Takahashi & Kita, 2001)
+	This function applies blend crossover recombination (Takahashi & Kita, 2001)
+	:param parent_1: first parent object of class Individual
+	:param parent_2: first parent object of class Individual
 	"""
 	alpha = 0.5 # ref Eshelmann & Schafer
 
@@ -140,7 +142,8 @@ def blend_crossover(parent_1, parent_2):
 
 def survival_selection(offspring, population_size):
 	"""
-	Perform survivor selection by picking best-performing offspring.
+	Perform survivor selection by picking best-performing offspring
+	:param offspring: list of offspring created in current generation
 	"""
 	sorted_offspring = sorted(offspring, key = lambda individual: individual.fitness)
 	best_offspring = sorted_offspring[-population_size:]
