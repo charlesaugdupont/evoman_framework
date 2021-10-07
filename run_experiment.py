@@ -1,9 +1,10 @@
 ##################################################################################
-# This file is the main experiment script that we call from the command line
+# This file is the high level experiment script that we call from the command line
 # e.g. "python run_experiment.py [arguments]"
 #
-# We can pass arguments such as population size, number of generations,
-# enemy number, even perhaps which EA to use etc...
+# We can pass arguments such as enemy number, or experiment version.
+#
+# The goal of this script is to gather the data from all the runs and store it.
 ##################################################################################
 
 # imports framework
@@ -30,32 +31,40 @@ if progress_visualisation:
 
 # parses the arguments from command line
 parser = argparse.ArgumentParser()
-parser.add_argument("--pop_size", type=int, required=False, default=30)
-parser.add_argument("--num_gens", type=int, required=False, default=40)
-parser.add_argument("--num-neurons", type=int, required=False, default=10)
-parser.add_argument("--algorithm", type=str, required=False, default="GA")
-parser.add_argument("--enemy", type=int, required=True)
+parser.add_argument("--pop_size", type=int, required=False, default=40)
+parser.add_argument("--num_gens", type=int, required=False, default=30)
+parser.add_argument("--group", type=int, required=True)
 parser.add_argument("--version", type=str, required=True)
 args = parser.parse_args()
 
 population_size = args.pop_size
 num_generations = args.num_gens
-num_hidden_neurons = args.num_neurons
-enemy = args.enemy
-algorithm = args.algorithm
+group = int(args.group)
 version = args.version
 
+if group == 1:
+    enemy_group = [1,3,7]
+elif group == 2:
+    enemy_group = [1,3,5]
+else:
+    print("ENEMY GROUP MUST BE 1 OR 2")
+    sys.exit()
+
+num_hidden_neurons = 10
+
 # sets up experiment results folder for logs
-experiment_name = os.path.join("experiment_results", algorithm, version, "enemy"+str(enemy))
+experiment_name = os.path.join("experiment_results", version, "enemy_group_"+str(enemy_group))
 if not os.path.exists(experiment_name):
     os.makedirs(experiment_name)
 
 # initialize environment
 environment = Environment(experiment_name=experiment_name,
-                enemies=[enemy],
+                enemies=enemy_group,
+                multiplemode="yes",
                 playermode="ai",
                 player_controller=player_controller(num_hidden_neurons),
                 enemymode="static",
+                randomini="yes",
                 level=2,
                 speed="fastest", 
                 logs="off") # avoid logging to stdout
