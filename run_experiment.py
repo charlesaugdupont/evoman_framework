@@ -31,8 +31,8 @@ if progress_visualisation:
 
 # parses the arguments from command line
 parser = argparse.ArgumentParser()
-parser.add_argument("--pop_size", type=int, required=False, default=40)
-parser.add_argument("--num_gens", type=int, required=False, default=30)
+parser.add_argument("--pop_size", type=int, required=False, default=5)
+parser.add_argument("--num_gens", type=int, required=False, default=5)
 parser.add_argument("--group", type=int, required=True)
 parser.add_argument("--version", type=str, required=True)
 args = parser.parse_args()
@@ -53,7 +53,7 @@ else:
 num_hidden_neurons = 10
 
 # sets up experiment results folder for logs
-experiment_name = os.path.join("experiment_results", version, "enemy_group_"+str(enemy_group))
+experiment_name = os.path.join("experiment_results", version, "enemy_group_"+str(group))
 if not os.path.exists(experiment_name):
     os.makedirs(experiment_name)
 

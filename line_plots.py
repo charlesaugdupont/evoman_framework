@@ -6,14 +6,12 @@ import os
 
 # parse command line arguments
 parser = argparse.ArgumentParser()
-parser.add_argument("--enemy", type=int, required=True)
-parser.add_argument("--algorithm", type=str, required=False, default="GA")
+parser.add_argument("--group", type=int, required=True)
 parser.add_argument("--version", type=str, required=True)
 args = parser.parse_args()
-enemy = args.enemy
-algorithm = args.algorithm
+group = int(args.enemy)
 version = args.version
-experiment_name = os.path.join("experiment_results", algorithm, version, "enemy"+str(enemy))
+experiment_name = os.path.join("experiment_results", version, "enemy_group_"+str(group))
 
 # read data
 mean_fitness, max_fitness = [], []
@@ -41,10 +39,7 @@ plt.plot(np.arange(0, num_generations), max_fitness_mean, 'b', label="max")
 plt.fill_between(np.arange(0, num_generations), max_fitness_mean-max_fitness_sd, max_fitness_mean+max_fitness_sd, color='skyblue', alpha=0.5)
 plt.xlabel("Generation")
 plt.ylabel("Fitness")
-if algorithm == "GA":
-	plt.title("EA1 : Genetic Algorithm (Enemy {})".format(enemy))
-else:
-	plt.title("EA2 : -") # TODO: add proper name !
+
 plt.grid()
 plt.legend()
 fig.savefig(os.path.join(experiment_name, "line_plot.png"), dpi=fig.dpi)
