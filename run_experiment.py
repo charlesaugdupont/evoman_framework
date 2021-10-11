@@ -29,6 +29,9 @@ progress_visualisation = False
 if progress_visualisation:
     from progress_visualisation import initialise_progress_plot, plot_progress
 
+adaptive_pop_size = True
+adaptive_mutation = False
+
 # parses the arguments from command line
 parser = argparse.ArgumentParser()
 parser.add_argument("--pop_size", type=int, required=False, default=30)
@@ -80,7 +83,10 @@ for run in range(10):
     print("\n--- SIMULATING RUN "+str(run+1) + " ---")
 
     # initialize first generation
-    population = initialize_generation(environment, population_size, num_genes)
+    population = initialize_generation(environment, population_size, num_genes, adaptive_pop_size)
+
+    print(len(population))
+    print([ind.lifetime for ind in population])
 
     # store best individual
     most_fit = max(population, key=lambda individual: individual.fitness)
@@ -103,7 +109,9 @@ for run in range(10):
     for iteration in range(1, num_generations+1):
 
         # evolve generation
-        population = generate_next_generation(environment, population)
+        population = generate_next_generation(environment, population, adaptive_pop_size, adaptive_mutation)
+
+        print(len(population))
 
         # update best genotype if needed
         most_fit = max(population, key=lambda individual: individual.fitness)

@@ -22,6 +22,7 @@ class Individual:
 		self.genotype = genotype
 		self.fitness = None # value is assigned by calling compute_fitness() from evolution.py 
 		self.mutation_probability = 0.7
+		self.lifetime = 0
 
 	def compute_fitness(self, environment):
 		"""
