@@ -181,7 +181,7 @@ def blended_crossover(parent_1, parent_2):
 		bound_2 = max(parent_1.genotype[i], parent_2.genotype[i]) + alpha * difference
 		child_genotype[i] = np.random.uniform(bound_1, bound_2)
 
-	child_sigma = child_sigma_v3(parent_1, parent_2)
+	child_sigma = child_sigma_v4(parent_1, parent_2)
 
 	return child_genotype, child_sigma
 
@@ -264,6 +264,19 @@ def child_sigma_v3(parent_1, parent_2):
 		child_sigma[i] = np.random.uniform(bound_1, bound_2)
 
 	return child_sigma
+
+def child_sigma_v4(parent_1, parent_2):
+	"""
+	Sigma calculation for the self-adapting mutation with n step sizes.
+	"""
+	child_sigma = np.zeros((parent_1.num_genes,))
+	for i in range(parent_1.num_genes):
+		if np.random.uniform(0,1) <= 0.5:
+			child_sigma[i] = parent_1.sigma[i]
+		else:
+			child_sigma[i] = parent_2.sigma[i]
+	return child_sigma
+
 
 def survival_selection(offspring, population_size):
 	elitism = int(0.1*len(offspring))
