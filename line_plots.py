@@ -9,7 +9,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--group", type=int, required=True)
 parser.add_argument("--version", type=str, required=True)
 args = parser.parse_args()
-group = int(args.enemy)
+group = int(args.group)
 version = args.version
 experiment_name = os.path.join("experiment_results", version, "enemy_group_"+str(group))
 
