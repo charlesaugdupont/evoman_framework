@@ -9,7 +9,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--group", type=int, required=True)
 parser.add_argument("--version", type=str, required=True)
 args = parser.parse_args()
-group = int(args.enemy)
+group = int(args.group)
 version = args.version
 experiment_name = os.path.join("experiment_results", version, "enemy_group_"+str(group))
 
@@ -38,7 +38,7 @@ plt.fill_between(np.arange(0, num_generations), mean_fitness_mean-mean_fitness_s
 plt.plot(np.arange(0, num_generations), max_fitness_mean, 'b', label="max")
 plt.fill_between(np.arange(0, num_generations), max_fitness_mean-max_fitness_sd, max_fitness_mean+max_fitness_sd, color='skyblue', alpha=0.5)
 plt.xlabel("Generation")
-plt.ylabel("Fitness")
+plt.ylabel("Gain")
 
 plt.grid()
 plt.legend()

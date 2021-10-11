@@ -29,7 +29,7 @@ class Individual:
 		:param environment: (simulation) environment object
 		"""
 		fitness, player_energy, enemy_energy, time = environment.play(pcont=self.genotype)
-		return player_energy-enemy_energy
+		return player_energy-enemy_energy # gain
 
 	def mutate(self):
 		"""
