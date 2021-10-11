@@ -25,7 +25,7 @@ if headless:
     os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 # should progress be live-plotted
-progress_visualisation = False
+progress_visualisation = True
 if progress_visualisation:
     from progress_visualisation import initialise_progress_plot, plot_progress
 

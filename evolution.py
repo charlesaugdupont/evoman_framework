@@ -16,7 +16,8 @@ def initialize_generation(environment, population_size, num_genes, adaptive_pop_
 	"""
 	# initialize all individuals in the population 
 	all_genotypes = np.random.uniform(-1, 1, (population_size, num_genes))
-	generation = [Individual(all_genotypes[i]) for i in range(population_size)]
+	all_sigmas = np.random.uniform(0.1, 1.0, (population_size, num_genes))
+	generation = [Individual(all_genotypes[i], all_sigmas[i]) for i in range(population_size)]
 
 	# compute fitness of all individuals
 	for individual in generation:
@@ -157,12 +158,10 @@ def recombine(parent_1, parent_2):
 	:param parent_1: first parent object of class Individual
 	:param parent_2: first parent object of class Individual
 	"""
-	#child_genotype = blend_crossover(parent_1, parent_2)
-	# use the following line to run ES2 vs. use the above line to run ES1
-	child_genotype = whole_arith_recombination(parent_1, parent_2)
+	child_genotype, child_sigma = blend_crossover(parent_1, parent_2)
 
 	# return new child object
-	return Individual(child_genotype)
+	return Individual(child_genotype, child_sigma)
 
 
 def whole_arith_recombination(parent_1, parent_2):
@@ -191,13 +190,80 @@ def blend_crossover(parent_1, parent_2):
 		bound_2 = max(parent_1.genotype[i], parent_2.genotype[i]) + alpha * difference
 		child_genotype[i] = np.random.uniform(bound_1, bound_2)
 
-	return child_genotype
+	child_sigma = child_sigma_v4(parent_1, parent_2)
+
+	return child_genotype, child_sigma
+
+
+# def blended_crossover_v2(parent_1, parent_2):
+# 	"""
+# 	Performs recombination using the blended crossover methodology.
+# 	Can choose between two sigma methods:
+# 	- child_sigma_v1(parent_1, parent_2)
+# 	- child_sigma_v2(parent_1, parent_2)
+# 	"""
+# 	difference = abs(parent_1.genotype - parent_2.genotype)
+
+# 	# set alpha to 0.5 - equally likely to perform exploration and exploitation
+# 	alpha = 0.5
+
+# 	# sample random number uniformly from [0,1]
+# 	mu = np.random.uniform(0,1)
+
+# 	# calculate gamma (?)
+# 	gamma = (1 - 2 * alpha) * mu - alpha
+
+# 	# create child
+# 	child_genotype  = (1 - gamma) * parent_1.genotype + gamma * parent_2
+
+
+def child_sigma_v4(parent_1, parent_2):
+	"""
+	Sigma calculation for the self-adapting mutation with n step sizes.
+	"""
+	child_sigma = np.zeros((parent_1.num_genes,))
+	for i in range(parent_1.num_genes):
+		if np.random.uniform(0,1) <= 0.5:
+			child_sigma[i] = parent_1.sigma[i]
+		else:
+			child_sigma[i] = parent_2.sigma[i]
+	return child_sigma
 
 
 def survival_selection(offspring, population_size):
-	"""
-	Perform survivor selection by picking best-performing offspring.
-	"""
+	elitism = int(0.1*len(offspring))
+	leftover = population_size - elitism
+	sorted_offspring = sorted(offspring, key = lambda individual: individual.fitness)
+	best_offspring = sorted_offspring[-elitism:]
+
+	#Pairwise tournament: the offspring with the higher fitness from the tournament survives.
+	#This is repeated until we filled up the remaining "leftover" spots. 
+
+	tournament_offspring = []
+	
+	while len(tournament_offspring) < leftover: 
+		x = sorted_offspring[:leftover]
+		potential = np.random.choice(x, 2, replace = False)
+
+		#the tournament
+		if potential[0].fitness >= potential[1].fitness:
+			tournament_offspring.append(potential[0])
+		else:
+			tournament_offspring.append(potential[1])
+	
+	#constructing the new population consisting of these two groups of offspring
+	new_population = best_offspring + tournament_offspring 
+	return new_population
+
+#note: we would have to delete the "population" input from the survival_selection in def generate_next_generation
+#we would also have to make num_offspring = 2 in def generate_next_generation
+
+def survival_selection_old(population, offspring):
+	num_parents = len(population) - len(offspring)
+	new_population = offspring + sorted(population, key = lambda individual: individual.fitness)[-num_parents:]
+	return new_population
+
+def survival_selection_finest(offspring, population_size):
 	sorted_offspring = sorted(offspring, key = lambda individual: individual.fitness)
 	best_offspring = sorted_offspring[-population_size:]
 	return best_offspring
