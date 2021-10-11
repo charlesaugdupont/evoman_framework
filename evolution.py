@@ -30,7 +30,7 @@ def initialize_generation(environment, population_size, num_genes, adaptive_pop_
 
 
 def generate_next_generation(environment, population, adaptive_pop_size, 
-							 adaptive_mutation):
+							 adaptive_mutation, tournament_survival):
 	"""
 	Generates next generation from current population.
 	:param environment: (simulation) environment object
@@ -56,12 +56,13 @@ def generate_next_generation(environment, population, adaptive_pop_size,
 			individual.lifetime -= 1
 			if individual.lifetime > 0:
 				new_population.append(individual)
-
-		print([ind.lifetime for ind in new_population])
 		
 	else:
 		# perform survival selection to return next generation with same size as input generation
-		new_population = survival_selection(offspring, len(population))
+		if tournament_survival:
+			new_population = survival_selection_tournament(offspring, len(population))
+		else:
+			new_population = survival_selection_top(offspring, len(population))
 
 	return new_population
 
@@ -83,7 +84,7 @@ def assign_lifetime(offspring, population=None):
 	min_fitness = np.min(all_fitness)
 	max_fitness = np.max(all_fitness)
 
-	max_lt = 7
+	max_lt = 4
 	min_lt = 1
 	eta = (max_lt - min_lt) / 2
 
@@ -136,7 +137,7 @@ def create_offspring(environment, parent_1, parent_2, adaptive_mutation, num_off
 	children = []
 	for i in range(num_offspring):
 		# apply whole arithmetic recombination to create children
-		child = recombine(parent_1, parent_2)
+		child = recombine(parent_1, parent_2, adaptive_mutation)
 
 		# apply mutation and add child to children list		
 		if adaptive_mutation:
@@ -151,14 +152,19 @@ def create_offspring(environment, parent_1, parent_2, adaptive_mutation, num_off
 	return children
 
 
-def recombine(parent_1, parent_2):
+def recombine(parent_1, parent_2, adaptive_mutation):
 	"""
 	Performs recombination between two parents, creating a child.
 	Use blend_crossover for ES1 and whole_arith_recombination for ES2.
 	:param parent_1: first parent object of class Individual
 	:param parent_2: first parent object of class Individual
 	"""
-	child_genotype, child_sigma = blend_crossover(parent_1, parent_2)
+	child_genotype = blend_crossover(parent_1, parent_2)
+	if adaptive_mutation:
+		child_sigma = child_sigma_v4(parent_1, parent_2)
+	else:
+		# child sigma will be ignored in this case
+		child_sigma = parent_1.sigma
 
 	# return new child object
 	return Individual(child_genotype, child_sigma)
@@ -190,31 +196,7 @@ def blend_crossover(parent_1, parent_2):
 		bound_2 = max(parent_1.genotype[i], parent_2.genotype[i]) + alpha * difference
 		child_genotype[i] = np.random.uniform(bound_1, bound_2)
 
-	child_sigma = child_sigma_v4(parent_1, parent_2)
-
-	return child_genotype, child_sigma
-
-
-# def blended_crossover_v2(parent_1, parent_2):
-# 	"""
-# 	Performs recombination using the blended crossover methodology.
-# 	Can choose between two sigma methods:
-# 	- child_sigma_v1(parent_1, parent_2)
-# 	- child_sigma_v2(parent_1, parent_2)
-# 	"""
-# 	difference = abs(parent_1.genotype - parent_2.genotype)
-
-# 	# set alpha to 0.5 - equally likely to perform exploration and exploitation
-# 	alpha = 0.5
-
-# 	# sample random number uniformly from [0,1]
-# 	mu = np.random.uniform(0,1)
-
-# 	# calculate gamma (?)
-# 	gamma = (1 - 2 * alpha) * mu - alpha
-
-# 	# create child
-# 	child_genotype  = (1 - gamma) * parent_1.genotype + gamma * parent_2
+	return child_genotype
 
 
 def child_sigma_v4(parent_1, parent_2):
@@ -230,7 +212,7 @@ def child_sigma_v4(parent_1, parent_2):
 	return child_sigma
 
 
-def survival_selection(offspring, population_size):
+def survival_selection_tournament(offspring, population_size):
 	elitism = int(0.1*len(offspring))
 	leftover = population_size - elitism
 	sorted_offspring = sorted(offspring, key = lambda individual: individual.fitness)
@@ -255,15 +237,7 @@ def survival_selection(offspring, population_size):
 	new_population = best_offspring + tournament_offspring 
 	return new_population
 
-#note: we would have to delete the "population" input from the survival_selection in def generate_next_generation
-#we would also have to make num_offspring = 2 in def generate_next_generation
-
-def survival_selection_old(population, offspring):
-	num_parents = len(population) - len(offspring)
-	new_population = offspring + sorted(population, key = lambda individual: individual.fitness)[-num_parents:]
-	return new_population
-
-def survival_selection_finest(offspring, population_size):
+def survival_selection_top(offspring, population_size):
 	sorted_offspring = sorted(offspring, key = lambda individual: individual.fitness)
 	best_offspring = sorted_offspring[-population_size:]
 	return best_offspring

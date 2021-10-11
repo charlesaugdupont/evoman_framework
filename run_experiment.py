@@ -25,12 +25,18 @@ if headless:
     os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 # should progress be live-plotted
-progress_visualisation = True
+progress_visualisation = False
 if progress_visualisation:
     from progress_visualisation import initialise_progress_plot, plot_progress
 
-adaptive_pop_size = True
+
+################################### SETTINGS
+
+adaptive_pop_size = False # DO NOT CHANGE THIS
 adaptive_mutation = False
+tournament_survival = True
+
+###################################
 
 # parses the arguments from command line
 parser = argparse.ArgumentParser()
@@ -85,9 +91,6 @@ for run in range(10):
     # initialize first generation
     population = initialize_generation(environment, population_size, num_genes, adaptive_pop_size)
 
-    print(len(population))
-    print([ind.lifetime for ind in population])
-
     # store best individual
     most_fit = max(population, key=lambda individual: individual.fitness)
     best_genotype, best_fitness = most_fit.genotype, most_fit.fitness
@@ -109,9 +112,7 @@ for run in range(10):
     for iteration in range(1, num_generations+1):
 
         # evolve generation
-        population = generate_next_generation(environment, population, adaptive_pop_size, adaptive_mutation)
-
-        print(len(population))
+        population = generate_next_generation(environment, population, adaptive_pop_size, adaptive_mutation, tournament_survival)
 
         # update best genotype if needed
         most_fit = max(population, key=lambda individual: individual.fitness)
