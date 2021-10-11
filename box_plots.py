@@ -9,16 +9,13 @@ import argparse
 
 # parse command line arguments
 parser = argparse.ArgumentParser()
-parser.add_argument("--enemy", type=int, required=True)
-parser.add_argument("--algorithm", type=str, required=False, default="GA")
-parser.add_argument("--num-neurons", type=int, required=False, default=10)
+parser.add_argument("--group", type=str, required=True)
 parser.add_argument("--version", type=str, required=True)
 args = parser.parse_args()
-enemy = args.enemy
-algorithm = args.algorithm
 version = args.version
-num_hidden_neurons = int(args.num_neurons)
-experiment_name = os.path.join("experiment_results", algorithm, version, "enemy"+str(enemy))
+group = args.group
+num_hidden_neurons = 10
+experiment_name = os.path.join("experiment_results", version, "enemy_group_"+group)
 
 # choose this for not using visuals and thus making experiments faster
 headless = True
@@ -27,10 +24,12 @@ if headless:
 
 # initialize environment
 environment = Environment(experiment_name=experiment_name,
-				enemies=[enemy],
+				enemies=[1,2,3,4,5,6,7,8],
+				multiplemode="yes",
 				playermode="ai",
 				player_controller=player_controller(num_hidden_neurons),
 				enemymode="static",
+				randomini="yes",
 				level=2,
 				speed="fastest", 
 				logs="off") # avoid logging to stdout
@@ -58,5 +57,5 @@ fig = plt.figure()
 plt.boxplot(means, labels=["EA1"])
 plt.grid()
 plt.ylabel("Gain")
-plt.title("Performance of Best Solutions (Enemy {})".format(enemy))
+plt.title("Performance of Best Solutions")
 fig.savefig(os.path.join(experiment_name, "box_plot.png"), dpi=fig.dpi)
