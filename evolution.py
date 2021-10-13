@@ -5,6 +5,7 @@
 
 
 import numpy as np
+import itertools
 from individual import Individual
 
 
@@ -47,6 +48,9 @@ def generate_next_generation(environment, population, adaptive_pop_size,
 	for i in range(len(parent_pairs)):
 		children = create_offspring(environment, parent_pairs[i][0], parent_pairs[i][1], adaptive_mutation, num_offspring=1)
 		offspring += children # concatenate children to offspring list	
+	
+	# adjusted fitness based on fitness sharing principle
+	fitness_sharing(offspring)
 
 	if adaptive_pop_size:
 		assign_lifetime(offspring, population)
@@ -64,7 +68,42 @@ def generate_next_generation(environment, population, adaptive_pop_size,
 		else:
 			new_population = survival_selection_top(offspring, len(population))
 
+	for i in new_population:
+		print(i.fitness)
+
 	return new_population
+
+def fitness_sharing(offspring):
+	"""
+	
+	"""
+	# create all possible pairs between offspring
+	pairs = list(itertools.combinations(offspring, 2))
+	for children in pairs:
+		x, y = children
+
+	# calculate euclidian distances
+	all_distances = []
+	for pair in pairs:
+		x, y = pair
+		dist = np.linalg.norm(x.genotype - y.genotype)
+		# give each genotype (child) a distance
+		x.distances.append(dist)
+		y.distances.append(dist)
+
+	alpha = 2 # Eiben & Smith (2015) specifies for alpha = 1 the function is linear
+	sigma_share = 15 # Eiben & Smith (2015) specifies between 5 and 10 as a suggested range
+	sharing_function = 0
+	for child in offspring:
+		for i in range(len(child.distances)):
+			if child.distances[i] < sigma_share:
+				sharing_function += (1 - (child.distances[i]/sigma_share)**alpha)
+			else: 
+				sharing_function += 0
+		fitness_adjusted = child.fitness / sharing_function
+		child.fitness_adj = fitness_adjusted
+		child.fitness = fitness_adjusted
+
 
 def assign_lifetime(offspring, population=None):
 
