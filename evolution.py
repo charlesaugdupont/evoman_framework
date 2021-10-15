@@ -8,7 +8,7 @@ import numpy as np
 from individual import Individual
 
 
-def initialize_generation(environment, population_size, num_genes, adaptive_pop_size):
+def initialize_generation(environment, population_size, num_genes):
 	"""
 	Randomly initializes a generation by returning list of objects of class Individual.
 	:param population_size: number of individuals in population
@@ -23,24 +23,17 @@ def initialize_generation(environment, population_size, num_genes, adaptive_pop_
 	for individual in generation:
 		individual.fitness = individual.compute_fitness(environment)
 
-	if adaptive_pop_size:
-		assign_lifetime(generation)
-
 	return generation
 
 
-def generate_next_generation(environment, population, adaptive_pop_size, 
-							 adaptive_mutation, tournament_survival):
+def generate_next_generation(environment, population, adaptive_mutation):
 	"""
 	Generates next generation from current population.
 	:param environment: (simulation) environment object
 	:param population: list of objects of class Individual
 	"""
 	# generate pairs of parents that can be used for recombination
-	if adaptive_pop_size:
-		parent_pairs = parent_selection_random(population, num_pairs=int(0.4*len(population)))
-	else:
-		parent_pairs = parent_selection_ranking(population, num_pairs=len(population)*4)
+	parent_pairs = parent_selection_ranking(population, num_pairs=len(population)*4)
 
 	# generate offspring
 	offspring = []
@@ -48,58 +41,8 @@ def generate_next_generation(environment, population, adaptive_pop_size,
 		children = create_offspring(environment, parent_pairs[i][0], parent_pairs[i][1], adaptive_mutation, num_offspring=1)
 		offspring += children # concatenate children to offspring list	
 
-	if adaptive_pop_size:
-		assign_lifetime(offspring, population)
-		
-		new_population = offspring
-		for individual in population:
-			individual.lifetime -= 1
-			if individual.lifetime > 0:
-				new_population.append(individual)
-		
-	else:
-		# perform survival selection to return next generation with same size as input generation
-		if tournament_survival:
-			new_population = survival_selection_tournament(offspring, len(population))
-		else:
-			new_population = survival_selection_top(offspring, len(population))
-
+	new_population = survival_selection_top(offspring, len(population))
 	return new_population
-
-def assign_lifetime(offspring, population=None):
-
-	if population is None:
-		population = offspring
-
-	population_fitness = [ind.fitness for ind in population]
-	offspring_fitness = [child.fitness for child in offspring]
-	all_fitness = population_fitness + offspring_fitness
-	pop_min = np.min(all_fitness)
-	all_fitness = [value - pop_min for value in all_fitness]
-	scaled_offspring_fitness = [value - pop_min for value in offspring_fitness]
-
-	print(scaled_offspring_fitness)
-
-	avg_fitness = np.mean(all_fitness)
-	min_fitness = np.min(all_fitness)
-	max_fitness = np.max(all_fitness)
-
-	max_lt = 4
-	min_lt = 1
-	eta = (max_lt - min_lt) / 2
-
-	for i, child in enumerate(offspring):
-		if avg_fitness >= scaled_offspring_fitness[i]:
-			offspring[i].lifetime = int(min_lt + eta * (scaled_offspring_fitness[i] - min_fitness) / (avg_fitness - min_fitness))
-		else:
-			offspring[i].lifetime = int((min_lt + max_lt)/2 + eta * (scaled_offspring_fitness[i]-avg_fitness) / (max_fitness - avg_fitness))
-
-def parent_selection_random(population, num_pairs):
-	parent_pairs = []
-	while len(parent_pairs) != num_pairs:
-		selection = np.random.choice(population, 2, replace=False)
-		parent_pairs.append((selection[0], selection[1]))
-	return parent_pairs
 
 def parent_selection_ranking(population, num_pairs, s=1.5):
 	"""
@@ -211,31 +154,6 @@ def child_sigma_v4(parent_1, parent_2):
 			child_sigma[i] = parent_2.sigma[i]
 	return child_sigma
 
-
-def survival_selection_tournament(offspring, population_size):
-	elitism = int(0.1*len(offspring))
-	leftover = population_size - elitism
-	sorted_offspring = sorted(offspring, key = lambda individual: individual.fitness)
-	best_offspring = sorted_offspring[-elitism:]
-
-	#Pairwise tournament: the offspring with the higher fitness from the tournament survives.
-	#This is repeated until we filled up the remaining "leftover" spots. 
-
-	tournament_offspring = []
-	
-	while len(tournament_offspring) < leftover: 
-		x = sorted_offspring[:leftover]
-		potential = np.random.choice(x, 2, replace = False)
-
-		#the tournament
-		if potential[0].fitness >= potential[1].fitness:
-			tournament_offspring.append(potential[0])
-		else:
-			tournament_offspring.append(potential[1])
-	
-	#constructing the new population consisting of these two groups of offspring
-	new_population = best_offspring + tournament_offspring 
-	return new_population
 
 def survival_selection_top(offspring, population_size):
 	sorted_offspring = sorted(offspring, key = lambda individual: individual.fitness)

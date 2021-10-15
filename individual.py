@@ -22,7 +22,7 @@ class Individual:
 		self.genotype = genotype
 		self.sigma = sigma
 		self.fitness = None # value is assigned by calling compute_fitness() from evolution.py 
-		self.mutation_probability = 0.7
+		self.mutation_probability = 1.0
 		self.lifetime = 0
 		# lower limit for sigma
 		self.epsilon = 0.001
@@ -31,8 +31,8 @@ class Individual:
 		# the square root of the genome size, and the gene-wise learning rate
 		# should be inversely proportional to sqrt(2*sqrt(n)) (n = size of
 		# genome)
-		self.common_learning_rate = 0.1 * (1/np.sqrt(2*self.num_genes))
-		self.gene_learning_rate = 0.1 * (1/np.sqrt(2*np.sqrt(self.num_genes)))
+		self.common_learning_rate = 10 * (1/np.sqrt(2*self.num_genes))
+		self.gene_learning_rate = 10 * (1/np.sqrt(2*np.sqrt(self.num_genes)))
 
 	def compute_fitness(self, environment):
 		"""

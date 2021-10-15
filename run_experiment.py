@@ -30,11 +30,14 @@ if progress_visualisation:
     from progress_visualisation import initialise_progress_plot, plot_progress
 
 
+class Environment2(Environment):
+    def cons_multi(self, values):
+        return values.mean()
+
+
 ################################### SETTINGS
 
-adaptive_pop_size = False # DO NOT CHANGE THIS
-adaptive_mutation = False
-tournament_survival = True
+adaptive_mutation = True
 
 ###################################
 
@@ -52,9 +55,9 @@ group = int(args.group)
 version = args.version
 
 if group == 1:
-    enemy_group = [1,3,7]
+    enemy_group = [7,8]
 elif group == 2:
-    enemy_group = [1,3,5]
+    enemy_group = [1,3]
 else:
     print("ENEMY GROUP MUST BE 1 OR 2")
     sys.exit()
@@ -67,7 +70,7 @@ if not os.path.exists(experiment_name):
     os.makedirs(experiment_name)
 
 # initialize environment
-environment = Environment(experiment_name=experiment_name,
+environment = Environment2(experiment_name=experiment_name,
                 enemies=enemy_group,
                 multiplemode="yes",
                 playermode="ai",
@@ -75,7 +78,7 @@ environment = Environment(experiment_name=experiment_name,
                 enemymode="static",
                 randomini="yes",
                 level=2,
-                speed="fastest", 
+                speed="fastest",
                 logs="off") # avoid logging to stdout
 
 # total number of "genes" or weights in the neural network controller
@@ -89,7 +92,7 @@ for run in range(10):
     print("\n--- SIMULATING RUN "+str(run+1) + " ---")
 
     # initialize first generation
-    population = initialize_generation(environment, population_size, num_genes, adaptive_pop_size)
+    population = initialize_generation(environment, population_size, num_genes)
 
     # store best individual
     most_fit = max(population, key=lambda individual: individual.fitness)
@@ -112,7 +115,7 @@ for run in range(10):
     for iteration in range(1, num_generations+1):
 
         # evolve generation
-        population = generate_next_generation(environment, population, adaptive_pop_size, adaptive_mutation, tournament_survival)
+        population = generate_next_generation(environment, population, adaptive_mutation)
 
         # update best genotype if needed
         most_fit = max(population, key=lambda individual: individual.fitness)
