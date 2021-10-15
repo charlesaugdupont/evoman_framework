@@ -19,13 +19,15 @@ import argparse
 import numpy as np
 from evolution import initialize_generation, generate_next_generation
 
+import matplotlib.pyplot as plt
+
 # choose this for not using visuals and thus making experiments faster
 headless = True
 if headless:
     os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 # should progress be live-plotted
-progress_visualisation = False
+progress_visualisation = True
 if progress_visualisation:
     from progress_visualisation import initialise_progress_plot, plot_progress
 
@@ -102,11 +104,12 @@ for run in range(10):
     # store overall generation metrics
     fitness_scores = [individual.fitness for individual in population]
     maximum, mean, sd = most_fit.fitness, np.mean(fitness_scores), np.std(fitness_scores)
+    avg_step_size = np.mean([ind.sigma.mean() for ind in population])
     with open(os.path.join(experiment_name, "run"+str(run)+"_results.csv"), 'w', encoding="UTF-8") as f:
         writer = csv.writer(f)
-        writer.writerow(["Generation", "Max", "Mean", "SD"]) # header
-        print("Generation 0 : Max ({:.3f}) | Mean ({:.3f}) | SD ({:.3f})".format(maximum, mean, sd)) # logging
-        writer.writerow([0, maximum, mean, sd])
+        writer.writerow(["Generation", "Max", "Mean", "SD", "Stepsize"]) # header
+        print("Generation 0 : Max ({:.3f}) | Mean ({:.3f}) | SD ({:.3f}) | Step size ({:.3f})".format(maximum, mean, sd, avg_step_size)) # logging
+        writer.writerow([0, maximum, mean, sd, avg_step_size])
 
     if progress_visualisation:
         plot_progress(fig, axs, population, fitness_scores, 0)
@@ -126,10 +129,11 @@ for run in range(10):
         # store overall generation metrics
         fitness_scores = [individual.fitness for individual in population]
         maximum, mean, sd = most_fit.fitness, np.mean(fitness_scores), np.std(fitness_scores)
+        avg_step_size = np.mean([ind.sigma.mean() for ind in population])
         with open(os.path.join(experiment_name, "run"+str(run)+"_results.csv"), 'a', encoding="UTF-8") as f:
             writer = csv.writer(f)
-            writer.writerow([iteration, maximum, mean, sd])
-            print("Generation {} : Max ({:.3f}) | Mean ({:.3f}) | SD ({:.3f})".format(iteration, maximum, mean, sd))
+            writer.writerow([iteration, maximum, mean, sd, avg_step_size])
+            print("Generation {} : Max ({:.3f}) | Mean ({:.3f}) | SD ({:.3f}) | Step size ({:.3f})".format(iteration, maximum, mean, sd, avg_step_size))
 
         if progress_visualisation:
             plot_progress(fig, axs, population, fitness_scores, iteration)

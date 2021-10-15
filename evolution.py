@@ -16,7 +16,7 @@ def initialize_generation(environment, population_size, num_genes):
 	"""
 	# initialize all individuals in the population 
 	all_genotypes = np.random.uniform(-1, 1, (population_size, num_genes))
-	all_sigmas = np.random.uniform(0.1, 1.0, (population_size, num_genes))
+	all_sigmas = np.random.uniform(0.001, 0.1, (population_size, num_genes))
 	generation = [Individual(all_genotypes[i], all_sigmas[i]) for i in range(population_size)]
 
 	# compute fitness of all individuals
