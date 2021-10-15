@@ -113,19 +113,6 @@ def recombine(parent_1, parent_2, adaptive_mutation):
 	return Individual(child_genotype, child_sigma)
 
 
-def whole_arith_recombination(parent_1, parent_2):
-	"""
-	This function applies whole arithmetic recombination (Eiben & Smith, 2015, p. 66)
-	:param parent_1: first parent object of class Individual
-	:param parent_2: first parent object of class Individual
-	"""
-	# compute child genotype
-	alpha = np.random.uniform(0,1)
-	child_genotype = alpha * parent_1.genotype + (1 - alpha) * parent_2.genotype
-
-	return child_genotype
-
-
 def blend_crossover(parent_1, parent_2):
 	"""
 	ref. A Crossover Operator Using Independent Component Analysis for Real-Coded Genetic Algorithms (Takahashi & Kita, 2001)
