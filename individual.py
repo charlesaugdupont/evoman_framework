@@ -74,9 +74,15 @@ class Individual:
 		# which genes to mutate
 		genes_to_mutate = np.random.uniform(0,1,self.num_genes) <= self.mutation_probability
 		# "mask" actual mutation amounts with genes_to_mutate
-		mutation_amount = genes_to_mutate * np.random.multivariate_normal(
-			mean = np.zeros(self.num_genes),
-			cov = np.diag(self.sigma))
-		
+		#mutation_amount = genes_to_mutate * np.random.multivariate_normal(
+		#	mean = np.zeros(self.num_genes),
+		#	cov = np.diag(self.sigma**2))
+
+		# calculate mutation amounts individually to make sure it goes right
+		# this time
+		mutation_amount = np.zeros((self.num_genes,))
+		for i in range(self.num_genes):
+			mutation_amount[i] = genes_to_mutate[i] * np.random.normal(0, self.sigma[i])
+
 		# apply mutation to genotype
 		self.genotype = weight_limit(self.genotype + mutation_amount)

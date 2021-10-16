@@ -131,7 +131,8 @@ def blend_crossover(parent_1, parent_2):
 
 def child_sigma_v4(parent_1, parent_2):
 	"""
-	Sigma calculation for the self-adapting mutation with n step sizes.
+	Sigma calculation for the self-adapting mutation with n step sizes. Uses
+	uniform crossover.
 	"""
 	child_sigma = np.zeros((parent_1.num_genes,))
 	for i in range(parent_1.num_genes):
@@ -139,6 +140,15 @@ def child_sigma_v4(parent_1, parent_2):
 			child_sigma[i] = parent_1.sigma[i]
 		else:
 			child_sigma[i] = parent_2.sigma[i]
+	return child_sigma
+
+def child_sigma_v5(parent_1, parent_2):
+	"""
+	Sigma calculation for the self-adapting mutation with n step sizes. Uses
+	whole arithmetic recombination.
+	"""
+	alpha = np.random.uniform(0, 1.0)
+	child_sigma = alpha * parent_1.sigma + (1-alpha) * parent_2.sigma
 	return child_sigma
 
 

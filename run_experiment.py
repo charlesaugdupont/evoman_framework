@@ -108,7 +108,7 @@ for run in range(10):
     with open(os.path.join(experiment_name, "run"+str(run)+"_results.csv"), 'w', encoding="UTF-8") as f:
         writer = csv.writer(f)
         writer.writerow(["Generation", "Max", "Mean", "SD", "Stepsize"]) # header
-        print("Generation 0 : Max ({:.3f}) | Mean ({:.3f}) | SD ({:.3f}) | Step size ({:.3f})".format(maximum, mean, sd, avg_step_size)) # logging
+        print("Generation 0 : Max ({:.3f}) | Mean ({:.3f}) | SD ({:.3f}) | Avg step size ({:.3f})".format(maximum, mean, sd, avg_step_size)) # logging
         writer.writerow([0, maximum, mean, sd, avg_step_size])
 
     if progress_visualisation:
@@ -130,10 +130,11 @@ for run in range(10):
         fitness_scores = [individual.fitness for individual in population]
         maximum, mean, sd = most_fit.fitness, np.mean(fitness_scores), np.std(fitness_scores)
         avg_step_size = np.mean([ind.sigma.mean() for ind in population])
+        clipped_prop = np.mean([np.mean((ind.genotype == -1.0) | (ind.genotype == 1.0)) for ind in population])
         with open(os.path.join(experiment_name, "run"+str(run)+"_results.csv"), 'a', encoding="UTF-8") as f:
             writer = csv.writer(f)
             writer.writerow([iteration, maximum, mean, sd, avg_step_size])
-            print("Generation {} : Max ({:.3f}) | Mean ({:.3f}) | SD ({:.3f}) | Step size ({:.3f})".format(iteration, maximum, mean, sd, avg_step_size))
+            print("Generation {} : Max ({:.3f}) | Mean ({:.3f}) | SD ({:.3f}) | Avg step size ({:.3f}) | Clipped prop ({:.2f})".format(iteration, maximum, mean, sd, avg_step_size, clipped_prop))
 
         if progress_visualisation:
             plot_progress(fig, axs, population, fitness_scores, iteration)
